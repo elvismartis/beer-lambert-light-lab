@@ -1,48 +1,5 @@
 # Light Lab — Interactive Beer–Lambert Simulator
 
-A self-contained educational web app for exploring light attenuation, transmittance, absorbance, and the Beer–Lambert law. It is designed for analytical chemistry teaching and can be hosted free with **GitHub Pages**.
-
-**Live demo:** Add your GitHub Pages URL here after deployment.
-
-## Features
-
-- Interactive incident and transmitted light intensity display.
-- Sliders for path length, molar absorptivity, and concentrations of two independent absorbing components.
-- Real-time calculation of transmittance, percent transmittance, absorbance, and the fraction of incident light not transmitted.
-- Visual cuvette and light-beam illustration.
-- Derivation of the Beer–Lambert law from differential attenuation.
-- Explanation of absorbance additivity for binary mixtures.
-- Short concept-check quiz.
-- Responsive layout for desktop, tablet, and mobile.
-- No dependencies, build tools, external fonts, tracking, or data collection.
-
-## Run locally
-
-1. Download or clone this repository.
-2. Open `index.html` in a modern web browser.
-
-For a local development server, you can also run:
-
-```bash
-python3 -m http.server 8000
-```
-
-Then visit <http://localhost:8000>.
-
-## Deploy with GitHub Pages
-
-1. Create a GitHub repository, for example `beer-lambert-light-lab`.
-2. Add `index.html`, `README.md`, and `LICENSE` to the repository root.
-3. Commit and push the files to the `main` branch.
-4. Open the repository's **Settings → Pages**.
-5. Under **Build and deployment**, choose **Deploy from a branch**.
-6. Select branch `main` and folder `/ (root)`, then save.
-7. Wait for GitHub Pages to publish the site. The URL will generally look like:
-
-   `https://YOUR-USERNAME.github.io/beer-lambert-light-lab/`
-
-If you use a different repository name, the URL will differ. GitHub's Pages interface displays the published URL.
-
 ## The science
 
 ### 1. Transmittance
