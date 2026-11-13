@@ -1,383 +1,2127 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#101827">
-  <meta name="description" content="An interactive educational simulator for transmittance, absorbance, and the Beer–Lambert law.">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="An interactive educational simulator for transmittance, absorbance, and the Beer–Lambert law with live photon visualization and code analysis.">
   <title>Light Lab — Beer–Lambert Simulator</title>
   <style>
     :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --bg-subtle: #f8fafc;
+      --card-bg: #ffffff;
+      --card-border: #e2e8f0;
+      --card-border-subtle: #f1f5f9;
+      --card-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03);
+      --card-shadow-hover: 0 10px 20px -3px rgba(15, 23, 42, 0.08), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --text-secondary: #334155;
+      --muted: #64748b;
+      --cyan: #0284c7;
+      --cyan-light: #e0f2fe;
+      --cyan-dark: #0369a1;
+      --blue: #2563eb;
+      --amber: #d97706;
+      --amber-light: #fef3c7;
+      --green: #059669;
+      --green-light: #ecfdf5;
+      --red: #e11d48;
+      --red-light: #ffe4e6;
+      --chamber-bg: #090e1a;
+      --chamber-border: #1e293b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 18px;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    [data-theme="dark"] {
       color-scheme: dark;
       --bg: #0b1220;
-      --panel: #121d30;
-      --panel-2: #17253b;
-      --line: #2b3b54;
-      --text: #edf4ff;
-      --muted: #a9b8cc;
-      --cyan: #58d7e8;
-      --blue: #7ba7ff;
-      --gold: #ffc66d;
-      --green: #65d6a4;
-      --red: #ff8d91;
-      --shadow: 0 18px 45px rgba(0,0,0,.22);
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --bg-subtle: #0f172a;
+      --card-bg: #131d31;
+      --card-border: #26354f;
+      --card-border-subtle: #1e2c44;
+      --card-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
+      --card-shadow-hover: 0 18px 40px rgba(0, 0, 0, 0.45);
+      --line: #24344d;
+      --text: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --muted: #94a3b8;
+      --cyan: #38bdf8;
+      --cyan-light: rgba(56, 189, 248, 0.12);
+      --cyan-dark: #0284c7;
+      --blue: #60a5fa;
+      --amber: #fbbf24;
+      --amber-light: rgba(251, 191, 36, 0.12);
+      --green: #34d399;
+      --green-light: rgba(52, 211, 153, 0.12);
+      --red: #fb7185;
+      --red-light: rgba(251, 113, 133, 0.12);
+      --chamber-bg: #060a12;
+      --chamber-border: #1a2538;
     }
+
     * { box-sizing: border-box; }
+    
     body {
-      margin: 0; min-height: 100vh; color: var(--text);
-      background:
-        radial-gradient(circle at 12% 0%, rgba(88,215,232,.13), transparent 28rem),
-        radial-gradient(circle at 95% 12%, rgba(123,167,255,.12), transparent 25rem), var(--bg);
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background-color: var(--bg);
+      background-image: 
+        radial-gradient(var(--line) 1px, transparent 1px);
+      background-size: 24px 24px;
+      background-position: -1px -1px;
       line-height: 1.55;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
-    button, input { font: inherit; }
-    .wrap { width: min(1160px, calc(100% - 32px)); margin: 0 auto; }
-    header { padding: 34px 0 22px; }
-    .eyebrow { color: var(--cyan); text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; font-weight: 800; }
-    h1 { margin: 8px 0 8px; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.05; letter-spacing: -.04em; }
-    .intro { max-width: 760px; color: var(--muted); font-size: 1.05rem; margin: 0; }
-    .tag { display:inline-flex; align-items:center; border:1px solid var(--line); background:rgba(255,255,255,.035); border-radius:999px; padding:5px 10px; color:var(--muted); font-size:.78rem; margin: 16px 6px 0 0; }
-    main { padding-bottom: 48px; }
-    .layout { display:grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); gap:18px; align-items:start; }
-    .panel { background:linear-gradient(160deg, rgba(23,37,59,.96), rgba(18,29,48,.96)); border:1px solid var(--line); border-radius:20px; padding:22px; box-shadow:var(--shadow); }
-    .panel h2 { margin:0 0 5px; font-size:1.18rem; letter-spacing:-.02em; }
-    .sub { color:var(--muted); font-size:.9rem; margin:0 0 18px; }
+
+    button, input, select { font: inherit; }
+
+    .wrap {
+      width: min(1200px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    /* Header styling */
+    header {
+      padding: 32px 0 20px;
+    }
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .eyebrow {
+      color: var(--cyan);
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-size: .78rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .eyebrow::before {
+      content: "";
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+    h1 {
+      margin: 8px 0 6px;
+      font-size: clamp(2rem, 4.5vw, 3.25rem);
+      line-height: 1.1;
+      letter-spacing: -.03em;
+      font-weight: 800;
+      color: var(--text);
+    }
+    h1 .dot-accent {
+      color: var(--cyan);
+    }
+    .intro {
+      max-width: 780px;
+      color: var(--text-secondary);
+      font-size: 1.05rem;
+      margin: 4px 0 16px;
+      line-height: 1.6;
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      color: var(--text);
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+    }
+    .theme-toggle:hover {
+      border-color: var(--cyan);
+      transform: translateY(-1px);
+    }
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: var(--card-bg);
+      border-radius: 999px;
+      padding: 5px 12px;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 500;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    }
+
+    /* Main layout */
+    main { padding-bottom: 56px; }
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(340px, 0.95fr);
+      gap: 22px;
+      align-items: start;
+    }
+
+    /* Panels & Cards */
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--card-shadow);
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 4px;
+    }
+    .panel h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      letter-spacing: -.02em;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .sub {
+      color: var(--muted);
+      font-size: .9rem;
+      margin: 4px 0 18px;
+      line-height: 1.45;
+    }
+
+    /* Mode switcher tabs (Visual Simulator vs Code Mode) */
+    .view-mode-tabs {
+      display: inline-flex;
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 18px;
+      width: 100%;
+    }
+    .tab-btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .tab-btn:hover {
+      color: var(--text);
+    }
+    .tab-btn.active {
+      background: var(--card-bg);
+      color: var(--cyan);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    }
+    .tab-badge {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: var(--cyan-light);
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* Beam Spectrometer Chamber */
     .beam-stage {
-      border:1px solid #344760; border-radius:16px; padding:16px; overflow:hidden;
-      background:linear-gradient(180deg, #0c1728, #101d31);
+      border: 1px solid var(--chamber-border);
+      border-radius: var(--radius-md);
+      padding: 18px 20px 24px;
+      overflow: hidden;
+      background: var(--chamber-bg);
+      color: #edf4ff;
+      position: relative;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
     }
-    .beam-labels { display:flex; justify-content:space-between; gap:12px; color:var(--muted); font-size:.78rem; margin-bottom:10px; }
-    .beam-track { height:112px; position:relative; display:flex; align-items:center; }
-    .beam-line { position:absolute; left:4%; right:4%; height:5px; top:50%; transform:translateY(-50%); background:linear-gradient(90deg, rgba(255,198,109,.15), rgba(255,198,109,.85)); border-radius:10px; }
-    .beam-line::before { content:""; position:absolute; inset:-8px 0; background:linear-gradient(90deg, transparent, rgba(255,198,109,.18), transparent); filter:blur(7px); }
-    .photons { position:absolute; left:4%; right:4%; top:50%; transform:translateY(-50%); height:1px; display:flex; justify-content:space-between; pointer-events:none; }
-    .photon { width:7px; height:7px; border-radius:50%; background:#ffe0a6; box-shadow:0 0 12px 3px rgba(255,198,109,.65); transition:opacity .25s; }
+    .beam-labels {
+      display: flex;
+      justify-content: space-between;
+      color: #94a3b8;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      margin-bottom: 14px;
+    }
+    .beam-track {
+      height: 128px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    /* Emitter & Detector housing graphics */
+    .emitter-source {
+      position: absolute;
+      left: 10px;
+      width: 18px;
+      height: 56px;
+      background: linear-gradient(180deg, #334155, #1e293b);
+      border: 2px solid #475569;
+      border-radius: 6px 2px 2px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    .emitter-source::after {
+      content: "";
+      width: 6px;
+      height: 20px;
+      background: #fbbf24;
+      border-radius: 2px;
+      box-shadow: 0 0 10px #fbbf24;
+    }
+    .detector-target {
+      position: absolute;
+      right: 10px;
+      width: 18px;
+      height: 56px;
+      background: linear-gradient(180deg, #334155, #1e293b);
+      border: 2px solid #475569;
+      border-radius: 2px 6px 6px 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+    }
+    .detector-sensor {
+      width: 6px;
+      height: 24px;
+      background: #38bdf8;
+      border-radius: 2px;
+      box-shadow: 0 0 10px #38bdf8;
+      transition: all 0.2s ease;
+    }
+
+    /* Beam line visual */
+    .beam-line-incident {
+      position: absolute;
+      left: 28px;
+      right: 50%;
+      height: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(251, 191, 36, 0.95), rgba(251, 191, 36, 0.85));
+      border-radius: 4px;
+      box-shadow: 0 0 12px 2px rgba(251, 191, 36, 0.5);
+      z-index: 2;
+    }
+    .beam-line-transmitted {
+      position: absolute;
+      left: 50%;
+      right: 28px;
+      height: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: linear-gradient(90deg, rgba(251, 191, 36, 0.85), rgba(251, 191, 36, 0.5));
+      border-radius: 4px;
+      box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+      z-index: 2;
+      transition: opacity 0.2s ease, filter 0.2s ease, height 0.2s ease;
+    }
+
+    /* Animated photon particles stream */
+    .photons-container {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 24px;
+      pointer-events: none;
+      z-index: 3;
+      overflow: hidden;
+    }
+    .photon-dot {
+      position: absolute;
+      top: 50%;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 8px 3px rgba(253, 224, 71, 0.8);
+      transform: translateY(-50%);
+    }
+
+    /* Dynamic Cuvette */
+    .cuvette-wrapper {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      height: 98px;
+      z-index: 4;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
     .cuvette {
-      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-      width:104px; height:92px; border:3px solid rgba(207,231,255,.72); border-top:0;
-      border-radius:0 0 12px 12px; background:rgba(88,215,232,.13); overflow:hidden;
-      box-shadow:inset 0 -10px 22px rgba(88,215,232,.08), 0 0 20px rgba(88,215,232,.08);
+      position: relative;
+      width: 104px;
+      height: 84px;
+      border: 3px solid rgba(224, 242, 254, 0.85);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      background: rgba(186, 230, 253, 0.08);
+      overflow: hidden;
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.15), inset 0 -6px 14px rgba(56, 189, 248, 0.1);
+      transition: width 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
-    .cuvette::before { content:""; position:absolute; top:0; left:-2px; right:-2px; height:3px; background:#cfe7ff; }
-    .liquid { position:absolute; bottom:0; left:0; right:0; height:72%; background:linear-gradient(90deg, rgba(88,215,232,.18), rgba(88,215,232,.48), rgba(88,215,232,.18)); transition:background .25s; }
-    .cuvette-label { position:absolute; left:50%; top:calc(50% + 54px); transform:translateX(-50%); color:var(--muted); font-size:.7rem; white-space:nowrap; }
-    .beam-end { position:absolute; right:3%; width:8px; height:42px; border-radius:6px; background:#9fb7d6; box-shadow:0 0 12px rgba(123,167,255,.4); }
-    .intensity-bars { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
-    .bar-card { background:rgba(255,255,255,.035); border:1px solid var(--line); padding:12px; border-radius:12px; }
-    .bar-head { display:flex; justify-content:space-between; gap:8px; color:var(--muted); font-size:.78rem; }
-    .bar-value { color:var(--text); font-weight:800; font-size:1.05rem; font-variant-numeric:tabular-nums; }
-    .meter { height:9px; background:#263750; border-radius:20px; overflow:hidden; margin-top:9px; }
-    .meter > span { display:block; height:100%; border-radius:20px; width:0; transition:width .2s ease; background:linear-gradient(90deg,var(--gold),#ffecb7); }
-    .meter.trans > span { background:linear-gradient(90deg,var(--cyan),var(--blue)); }
-    .controls { display:grid; gap:17px; }
-    .control { display:grid; gap:7px; }
-    .control-head { display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
-    label { font-weight:700; font-size:.9rem; }
-    output { color:var(--cyan); font-weight:800; font-variant-numeric:tabular-nums; }
-    input[type="range"] { width:100%; accent-color:var(--cyan); cursor:pointer; }
-    .range-meta { display:flex; justify-content:space-between; color:var(--muted); font-size:.72rem; }
-    .component { border:1px solid var(--line); padding:14px; border-radius:14px; background:rgba(255,255,255,.025); }
-    .component-title { display:flex; align-items:center; gap:9px; margin-bottom:12px; font-weight:800; }
-    .dot { width:10px; height:10px; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px currentColor; }
-    .dot.y { background:var(--blue); }
-    .component .control + .control { margin-top:12px; }
-    .results { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
-    .metric { padding:13px; border-radius:13px; background:#0e192a; border:1px solid var(--line); min-width:0; }
-    .metric small { color:var(--muted); display:block; font-size:.72rem; }
-    .metric strong { display:block; font-size:1.28rem; margin-top:3px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
-    .metric .unit { color:var(--muted); font-size:.72rem; }
-    .equation { background:#0d1727; border:1px solid var(--line); border-radius:14px; padding:15px; margin-top:14px; overflow-x:auto; }
-    .eq { font-family:Georgia, "Times New Roman", serif; font-size:1.12rem; text-align:center; margin:7px 0; }
-    .eq strong { color:var(--gold); }
-    .note { color:var(--muted); font-size:.83rem; margin:10px 0 0; }
-    .sections { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
-    .content p { color:var(--muted); margin:.55rem 0; }
-    .content h3 { margin:18px 0 5px; font-size:1rem; }
-    .step { display:flex; gap:12px; margin:13px 0; align-items:flex-start; }
-    .num { flex:0 0 27px; height:27px; display:grid; place-items:center; border-radius:50%; background:rgba(88,215,232,.13); color:var(--cyan); font-weight:800; font-size:.8rem; }
-    code, .math { color:#f6d69d; background:rgba(255,198,109,.08); border-radius:5px; padding:2px 5px; }
-    .callout { border-left:3px solid var(--cyan); padding:10px 13px; background:rgba(88,215,232,.07); border-radius:0 10px 10px 0; color:var(--muted); margin-top:14px; }
-    .quiz { display:grid; gap:12px; }
-    .quiz button, .reset {
-      border:1px solid var(--line); border-radius:10px; padding:9px 12px; color:var(--text);
-      background:#1b2b43; cursor:pointer; text-align:left;
+    /* Cuvette open top lip */
+    .cuvette::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -3px;
+      right: -3px;
+      height: 3px;
+      background: rgba(224, 242, 254, 0.95);
     }
-    .quiz button:hover, .reset:hover { border-color:var(--cyan); }
-    .quiz button.correct { border-color:var(--green); background:rgba(101,214,164,.1); }
-    .quiz button.wrong { border-color:var(--red); background:rgba(255,141,145,.1); }
-    .feedback { min-height:24px; color:var(--muted); font-size:.85rem; }
-    footer { padding:0 0 32px; color:var(--muted); font-size:.8rem; text-align:center; }
-    a { color:var(--cyan); }
-    @media (max-width:850px) { .layout,.sections { grid-template-columns:1fr; } }
-    @media (max-width:520px) {
-      .wrap { width:min(100% - 20px, 1160px); }
-      header { padding-top:25px; }
-      .panel { padding:16px; border-radius:16px; }
-      .results { grid-template-columns:1fr 1fr; }
-      .results .metric:last-child { grid-column:span 2; }
-      .intensity-bars { grid-template-columns:1fr; }
-      .beam-track { height:100px; }
-      .cuvette { width:82px; height:82px; }
+    /* Glass reflections */
+    .cuvette::after {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 4px;
+      bottom: 6px;
+      width: 3px;
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 2px;
+      pointer-events: none;
     }
-    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { transition:none !important; } }
+    .cuvette-liquid {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 78%;
+      background: rgba(14, 165, 233, 0.35);
+      transition: background 0.2s ease, opacity 0.2s ease;
+    }
+    /* Liquid meniscus */
+    .cuvette-liquid::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.25);
+      border-radius: 50%;
+    }
+    .cuvette-dimension-label {
+      margin-top: 6px;
+      color: #94a3b8;
+      font-size: .72rem;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      background: rgba(15, 23, 42, 0.7);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid #334155;
+    }
+
+    /* Intensity gauges and progress bars */
+    .intensity-bars {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 16px;
+    }
+    .bar-card {
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      padding: 14px;
+      border-radius: var(--radius-md);
+      transition: border-color 0.2s ease;
+    }
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      color: var(--muted);
+      font-size: .8rem;
+      font-weight: 600;
+    }
+    .bar-value {
+      color: var(--text);
+      font-weight: 800;
+      font-size: 1.15rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .meter {
+      height: 10px;
+      background: var(--line);
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 10px;
+    }
+    .meter > span {
+      display: block;
+      height: 100%;
+      border-radius: 20px;
+      width: 0;
+      transition: width .2s ease;
+      background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    }
+    .meter.trans > span {
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+    }
+
+    /* Primary analytical metrics */
+    .results {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .metric {
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      min-width: 0;
+      transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+    .metric:hover {
+      border-color: var(--cyan);
+    }
+    .metric small {
+      color: var(--muted);
+      display: block;
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .03em;
+    }
+    .metric strong {
+      display: block;
+      font-size: 1.38rem;
+      margin-top: 4px;
+      color: var(--text);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+    .metric .unit {
+      color: var(--cyan);
+      font-size: .78rem;
+      font-weight: 600;
+      display: block;
+      margin-top: 2px;
+    }
+    .note {
+      color: var(--muted);
+      font-size: .83rem;
+      margin: 14px 0 0;
+      line-height: 1.5;
+    }
+
+    /* Interactive Graph Canvas Section */
+    .graph-card {
+      margin-top: 20px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px;
+    }
+    .graph-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .graph-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .graph-btn-group {
+      display: inline-flex;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 2px;
+      gap: 2px;
+    }
+    .graph-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 10px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--muted);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .graph-btn.active {
+      background: var(--cyan);
+      color: #fff;
+    }
+    .canvas-container {
+      width: 100%;
+      height: 180px;
+      position: relative;
+    }
+    canvas#chartCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+    }
+    .graph-legend {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 0.74rem;
+      color: var(--muted);
+    }
+    .graph-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .legend-color-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* Controls Panel */
+    .controls { display: grid; gap: 18px; }
+    
+    /* Preset experiment bar */
+    .presets-container {
+      margin-bottom: 6px;
+    }
+    .presets-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 8px;
+    }
+    .presets-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .preset-pill {
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 11px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .preset-pill:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: var(--cyan-light);
+      transform: translateY(-1px);
+    }
+
+    /* Individual control rows */
+    .control {
+      display: grid;
+      gap: 8px;
+    }
+    .control-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+    label {
+      font-weight: 700;
+      font-size: .9rem;
+      color: var(--text);
+    }
+    .slider-input-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--line);
+      outline: none;
+      accent-color: var(--cyan);
+      cursor: pointer;
+      margin: 0;
+    }
+    .number-input {
+      width: 80px;
+      padding: 5px 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      background: var(--card-bg);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      transition: border-color 0.15s ease;
+    }
+    .number-input:focus {
+      outline: none;
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px var(--cyan-light);
+    }
+    output {
+      color: var(--cyan);
+      font-weight: 800;
+      font-size: 0.95rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .range-meta {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: .74rem;
+      margin-top: -2px;
+    }
+
+    /* Solute Component Cards */
+    .component {
+      border: 1px solid var(--line);
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-subtle);
+      position: relative;
+      transition: border-color 0.2s ease;
+    }
+    .component:focus-within {
+      border-color: var(--cyan);
+    }
+    .component-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      font-weight: 800;
+      font-size: 0.98rem;
+      color: var(--text);
+    }
+    .component-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px currentColor;
+    }
+    .dot.y {
+      background: var(--amber);
+    }
+    .component-calc {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .component-calc strong {
+      color: var(--text);
+    }
+    .component .control + .control {
+      margin-top: 14px;
+    }
+
+    /* Action buttons */
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+    .btn {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      background: var(--card-bg);
+      color: var(--text);
+    }
+    .btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      transform: translateY(-1px);
+    }
+    .btn-primary {
+      background: var(--cyan);
+      color: #fff;
+      border-color: var(--cyan);
+    }
+    .btn-primary:hover {
+      background: var(--cyan-dark);
+      border-color: var(--cyan-dark);
+      color: #fff;
+    }
+
+    /* Code Mode View (Interactive Python, Formulas & Math Breakdown) */
+    .code-mode-panel {
+      display: none;
+      margin-top: 18px;
+    }
+    .code-mode-panel.active {
+      display: block;
+    }
+    .code-box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .code-box-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border: 1px solid var(--line);
+      background: var(--card-bg);
+      color: var(--text-secondary);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .copy-btn:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+    pre.code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: 0.84rem;
+      line-height: 1.5;
+      overflow-x: auto;
+      margin: 0;
+      border: 1px solid #1e293b;
+    }
+    .code-token-kw { color: #f472b6; }
+    .code-token-fn { color: #60a5fa; }
+    .code-token-num { color: #34d399; }
+    .code-token-str { color: #fde047; }
+    .code-token-cm { color: #64748b; font-style: italic; }
+
+    /* Live Step-by-Step Calculation Breakdown */
+    .calc-breakdown {
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 14px;
+    }
+    .calc-step {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 8px 0;
+      border-bottom: 1px dashed var(--line);
+      font-size: 0.86rem;
+    }
+    .calc-step:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+      font-weight: 700;
+    }
+    .calc-step-label {
+      color: var(--text-secondary);
+    }
+    .calc-step-val {
+      font-family: var(--font-mono);
+      color: var(--text);
+      font-weight: 600;
+      text-align: right;
+    }
+
+    /* Theory and Reference Articles */
+    .sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 22px;
+    }
+    .content p {
+      color: var(--text-secondary);
+      margin: .6rem 0;
+      line-height: 1.6;
+    }
+    .content h3 {
+      margin: 20px 0 6px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .step {
+      display: flex;
+      gap: 14px;
+      margin: 16px 0;
+      align-items: flex-start;
+    }
+    .num {
+      flex: 0 0 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--cyan-light);
+      color: var(--cyan);
+      font-weight: 800;
+      font-size: .85rem;
+    }
+    .step strong {
+      color: var(--text);
+    }
+    code, .math {
+      color: var(--cyan-dark);
+      background: var(--cyan-light);
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+    }
+    [data-theme="dark"] code, [data-theme="dark"] .math {
+      color: #7dd3fc;
+      background: rgba(56, 189, 248, 0.15);
+    }
+    .callout {
+      border-left: 3px solid var(--cyan);
+      padding: 12px 16px;
+      background: var(--cyan-light);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      color: var(--text-secondary);
+      margin-top: 16px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .equation {
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-top: 14px;
+      overflow-x: auto;
+    }
+    .eq {
+      font-family: "Cambria Math", "Latin Modern Math", Georgia, "Times New Roman", serif;
+      font-size: 1.15rem;
+      text-align: center;
+      margin: 8px 0;
+      color: var(--text);
+    }
+    .eq strong {
+      color: var(--cyan);
+      font-weight: 700;
+    }
+
+    /* Quiz Component */
+    .quiz { display: grid; gap: 10px; margin-top: 10px; }
+    .quiz-question {
+      font-weight: 700;
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 4px;
+    }
+    .quiz button {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      padding: 11px 16px;
+      color: var(--text);
+      background: var(--card-bg);
+      cursor: pointer;
+      text-align: left;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .quiz button:hover {
+      border-color: var(--cyan);
+      background: var(--bg-subtle);
+    }
+    .quiz button.correct {
+      border-color: var(--green);
+      background: var(--green-light);
+      color: var(--green);
+      font-weight: 700;
+    }
+    .quiz button.wrong {
+      border-color: var(--red);
+      background: var(--red-light);
+      color: var(--red);
+      font-weight: 700;
+    }
+    .feedback {
+      min-height: 36px;
+      color: var(--text-secondary);
+      font-size: .88rem;
+      line-height: 1.5;
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-subtle);
+      border: 1px solid var(--line);
+      margin-top: 4px;
+    }
+
+    /* Footer */
+    footer {
+      padding: 24px 0 40px;
+      color: var(--muted);
+      font-size: .85rem;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      margin-top: 40px;
+    }
+
+    /* Responsive Media Queries */
+    @media (max-width: 960px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+      .sections {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .wrap {
+        width: calc(100% - 24px);
+      }
+      header {
+        padding: 24px 0 16px;
+      }
+      .panel {
+        padding: 16px;
+        border-radius: var(--radius-md);
+      }
+      .results {
+        grid-template-columns: 1fr 1fr;
+      }
+      .results .metric:last-child {
+        grid-column: span 2;
+      }
+      .intensity-bars {
+        grid-template-columns: 1fr;
+      }
+      .beam-track {
+        height: 110px;
+      }
+      .slider-input-group {
+        gap: 8px;
+      }
+      .number-input {
+        width: 70px;
+      }
+      .view-mode-tabs {
+        flex-direction: column;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
   </style>
 </head>
 <body>
   <header class="wrap">
-    <div class="eyebrow">Interactive analytical chemistry</div>
-    <h1>Light Lab <span style="color:var(--cyan)">●</span></h1>
-    <p class="intro">Explore how a solution attenuates light. Change concentration, path length and absorptivity to see transmittance fall and absorbance rise according to the Beer–Lambert law.</p>
-    <span class="tag">Beer–Lambert law</span><span class="tag">Absorbance & transmittance</span><span class="tag">Binary mixtures</span>
+    <div class="header-top">
+      <div>
+        <div class="eyebrow">Interactive Analytical Chemistry Lab</div>
+        <h1>Light Lab <span class="dot-accent">●</span></h1>
+      </div>
+      <div class="header-actions">
+        <button id="themeToggle" class="theme-toggle" aria-label="Toggle visual theme">
+          <span id="themeIcon">☀️</span>
+          <span id="themeText">Light</span>
+        </button>
+      </div>
+    </div>
+    <p class="intro">
+      Explore how radiant light attenuates across an absorbing solution. Vary the optical path length, solute concentration, and molar absorptivity to see transmittance decline exponentially while absorbance scales linearly in accordance with the <strong>Beer–Lambert law</strong>.
+    </p>
+    <div class="tag-cloud">
+      <span class="tag">Beer–Lambert law: A = εbc</span>
+      <span class="tag">Transmittance: T = I / I₀</span>
+      <span class="tag">Binary mixture additivity</span>
+      <span class="tag">Live photon attenuation</span>
+    </div>
   </header>
 
   <main class="wrap">
     <section class="layout">
+      <!-- Left Column: Optical Chamber & Analytical Visualizer -->
       <div class="panel">
-        <h2>Inside the cuvette</h2>
-        <p class="sub">A conceptual view of incident light, the absorbing sample and transmitted light.</p>
-        <div class="beam-stage" aria-label="Animated illustration of light passing through a sample cuvette">
-          <div class="beam-labels"><span>Incident beam · I₀</span><span>Detector · I</span></div>
-          <div class="beam-track">
-            <div class="beam-line"></div>
-            <div class="photons" id="photons"></div>
-            <div class="cuvette"><div class="liquid" id="liquid"></div></div>
-            <div class="cuvette-label">absorbing solution</div>
-            <div class="beam-end"></div>
+        <div class="panel-header">
+          <h2>Spectrometer Chamber</h2>
+          <span class="tag" style="margin:0; font-size:0.75rem;">Monochromatic Beam</span>
+        </div>
+        <p class="sub">Visualise the collimated incident beam (<i>I</i><sub>0</sub>), dynamic cuvette path (<i>b</i>), and transmitted light flux (<i>I</i>) reaching the photodetector.</p>
+
+        <!-- View Mode Switcher: Visual Lab vs Code Mode -->
+        <div class="view-mode-tabs" role="tablist">
+          <button id="tabVisual" class="tab-btn active" role="tab" aria-selected="true" aria-controls="visualModeContainer">
+            <span>🔬 Chamber & Visualizer</span>
+          </button>
+          <button id="tabCode" class="tab-btn" role="tab" aria-selected="false" aria-controls="codeModeContainer">
+            <span>💻 Code & Math Mode</span>
+            <span class="tab-badge">Python / Formula</span>
+          </button>
+        </div>
+
+        <!-- VISUAL MODE CONTAINER -->
+        <div id="visualModeContainer">
+          <!-- Optical Stage -->
+          <div class="beam-stage" aria-label="Animated illustration of monochromatic light traveling through a solution cuvette to a detector">
+            <div class="beam-labels">
+              <span>Source · Incident Beam <i>I</i><sub>0</sub></span>
+              <span>Sample Cuvette (<i>b</i>)</span>
+              <span>Photodetector · <i>I</i></span>
+            </div>
+
+            <div class="beam-track" id="beamTrack">
+              <!-- Light Source Emitter -->
+              <div class="emitter-source" title="Light source (I₀)"></div>
+
+              <!-- Incident Light Beam -->
+              <div class="beam-line-incident" id="incidentBeam"></div>
+
+              <!-- Moving Photons Overlay -->
+              <div class="photons-container" id="photonsTrack"></div>
+
+              <!-- Cuvette with dynamic width -->
+              <div class="cuvette-wrapper" id="cuvetteWrapper">
+                <div class="cuvette" id="cuvette">
+                  <div class="cuvette-liquid" id="liquid"></div>
+                </div>
+                <div class="cuvette-dimension-label" id="cuvetteWidthLabel">b = 1.00 cm</div>
+              </div>
+
+              <!-- Transmitted Light Beam -->
+              <div class="beam-line-transmitted" id="transmittedBeam"></div>
+
+              <!-- Photodetector Sensor -->
+              <div class="detector-target" title="Photodetector">
+                <div class="detector-sensor" id="detectorSensor"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Intensity Meters -->
+          <div class="intensity-bars">
+            <div class="bar-card">
+              <div class="bar-head">
+                <span>Incident Intensity (<i>I</i><sub>0</sub>)</span>
+                <span class="bar-value" id="i0Label">100.0</span>
+              </div>
+              <div class="meter"><span id="i0Bar" style="width:100%"></span></div>
+            </div>
+            <div class="bar-card">
+              <div class="bar-head">
+                <span>Transmitted Intensity (<i>I</i>)</span>
+                <span class="bar-value" id="iLabel">63.10</span>
+              </div>
+              <div class="meter trans"><span id="iBar" style="width:63.1%"></span></div>
+            </div>
+          </div>
+
+          <!-- Results Grid -->
+          <div class="results" aria-live="polite">
+            <div class="metric">
+              <small>Transmittance (T)</small>
+              <strong id="tResult">0.6310</strong>
+              <span class="unit" id="percentT">63.10%</span>
+            </div>
+            <div class="metric">
+              <small>Absorbance (A)</small>
+              <strong id="aResult">0.2000</strong>
+              <span class="unit">AU (dimensionless)</span>
+            </div>
+            <div class="metric">
+              <small>Attenuated Fraction</small>
+              <strong id="absorbedResult">36.90%</strong>
+              <span class="unit">1 − <i>T</i></span>
+            </div>
+          </div>
+
+          <!-- Interactive Live Graph (A vs c, T vs c, A vs b) -->
+          <div class="graph-card">
+            <div class="graph-controls">
+              <span class="graph-title">
+                <span>📈 Live Curve:</span>
+                <span id="graphTitleText" style="color:var(--cyan);">Absorbance vs Concentration</span>
+              </span>
+              <div class="graph-btn-group" role="group" aria-label="Graph Mode">
+                <button type="button" class="graph-btn active" data-graph="AvsC">A vs c</button>
+                <button type="button" class="graph-btn" data-graph="TvsC">T vs c</button>
+                <button type="button" class="graph-btn" data-graph="AvsB">A vs b</button>
+              </div>
+            </div>
+            <div class="canvas-container">
+              <canvas id="chartCanvas" width="560" height="180" aria-label="Interactive graph showing theoretical response curve and current operating point"></canvas>
+            </div>
+            <div class="graph-legend">
+              <span class="graph-legend-item">
+                <span class="legend-color-dot" style="background:var(--cyan);"></span>
+                <span id="legendLineLabel">Beer–Lambert function</span>
+              </span>
+              <span class="graph-legend-item">
+                <span class="legend-color-dot" style="background:#f59e0b; box-shadow:0 0 6px #f59e0b;"></span>
+                <span id="legendPointLabel">Current Operating Point</span>
+              </span>
+            </div>
+          </div>
+          <p class="note">
+            *“Attenuated fraction” represents radiant intensity not reaching the detector. In ideal conditions, this corresponds to molecular absorbance.
+          </p>
+        </div>
+
+        <!-- CODE & MATH MODE CONTAINER -->
+        <div id="codeModeContainer" class="code-mode-panel">
+          <div class="code-box-header">
+            <span class="code-box-title">
+              <span>🐍 Python Code (Reproduce Calculation & Curve)</span>
+            </span>
+            <button id="copyCodeBtn" class="copy-btn">
+              <span id="copyIcon">📋</span>
+              <span id="copyText">Copy Python</span>
+            </button>
+          </div>
+          <pre class="code-block" id="pythonSnippet"><code><span class="code-token-kw">import</span> numpy <span class="code-token-kw">as</span> np
+<span class="code-token-kw">import</span> matplotlib.pyplot <span class="code-token-kw">as</span> plt
+
+<span class="code-token-cm"># Beer–Lambert Law parameters from current Light Lab settings</span>
+I0 = <span class="code-token-num" id="pyI0">100.0</span>          <span class="code-token-cm"># Incident intensity</span>
+b = <span class="code-token-num" id="pyB">1.00</span>            <span class="code-token-cm"># Path length (cm)</span>
+eps_X = <span class="code-token-num" id="pyEpsX">10000</span>       <span class="code-token-cm"># L / (mol * cm)</span>
+c_X = <span class="code-token-num" id="pyCX">20.0e-6</span>       <span class="code-token-cm"># mol / L</span>
+eps_Y = <span class="code-token-num" id="pyEpsY">5000</span>        <span class="code-token-cm"># L / (mol * cm)</span>
+c_Y = <span class="code-token-num" id="pyCY">0.0e-6</span>        <span class="code-token-cm"># mol / L</span>
+
+<span class="code-token-cm"># Compute absorbances and transmittance</span>
+A_X = eps_X * b * c_X
+A_Y = eps_Y * b * c_Y
+A_total = A_X + A_Y
+T = <span class="code-token-num">10</span> ** (-A_total)
+I = I0 * T
+
+<span class="code-token-fn">print</span>(<span class="code-token-str">f"Absorbance: {A_total:.4f} AU"</span>)
+<span class="code-token-fn">print</span>(<span class="code-token-str">f"Transmittance: {T:.4f} ({T*100:.2f}%)"</span>)
+<span class="code-token-fn">print</span>(<span class="code-token-str">f"Transmitted Light (I): {I:.2f} units"</span>)</code></pre>
+
+          <!-- Live Step-by-Step Calculation Breakdown -->
+          <div class="calc-breakdown">
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:6px;">
+              Step-by-Step Numerical Substitution
+            </div>
+            <div class="calc-step">
+              <span class="calc-step-label">Component X: <i>A</i><sub>X</sub> = <i>ε</i><sub>X</sub> · <i>b</i> · <i>c</i><sub>X</sub></span>
+              <span class="calc-step-val" id="calcStepX">10,000 × 1.00 × 2.00×10⁻⁵ = 0.2000</span>
+            </div>
+            <div class="calc-step">
+              <span class="calc-step-label">Component Y: <i>A</i><sub>Y</sub> = <i>ε</i><sub>Y</sub> · <i>b</i> · <i>c</i><sub>Y</sub></span>
+              <span class="calc-step-val" id="calcStepY">5,000 × 1.00 × 0.00 = 0.0000</span>
+            </div>
+            <div class="calc-step">
+              <span class="calc-step-label">Total Absorbance: <i>A</i><sub>total</sub> = <i>A</i><sub>X</sub> + <i>A</i><sub>Y</sub></span>
+              <span class="calc-step-val" id="calcStepTotal">0.2000 + 0.0000 = 0.2000 AU</span>
+            </div>
+            <div class="calc-step">
+              <span class="calc-step-label">Transmittance: <i>T</i> = 10<sup>−<i>A</i><sub>total</sub></sup></span>
+              <span class="calc-step-val" id="calcStepT">10^(-0.2000) = 0.6310 (63.10%)</span>
+            </div>
+            <div class="calc-step">
+              <span class="calc-step-label">Transmitted Radiant Power: <i>I</i> = <i>I</i><sub>0</sub> · <i>T</i></span>
+              <span class="calc-step-val" id="calcStepI">100.0 × 0.6310 = 63.10 units</span>
+            </div>
           </div>
         </div>
-        <div class="intensity-bars">
-          <div class="bar-card">
-            <div class="bar-head"><span>Incident intensity</span><span class="bar-value" id="i0Label">100.0</span></div>
-            <div class="meter"><span id="i0Bar" style="width:100%"></span></div>
-          </div>
-          <div class="bar-card">
-            <div class="bar-head"><span>Transmitted intensity</span><span class="bar-value" id="iLabel">63.1</span></div>
-            <div class="meter trans"><span id="iBar" style="width:63.1%"></span></div>
-          </div>
-        </div>
-        <div class="results" aria-live="polite">
-          <div class="metric"><small>Transmittance, T</small><strong id="tResult">0.6310</strong><span class="unit" id="percentT">63.10%</span></div>
-          <div class="metric"><small>Absorbance, A</small><strong id="aResult">0.2000</strong><span class="unit">AU (dimensionless)</span></div>
-          <div class="metric"><small>Absorbed fraction*</small><strong id="absorbedResult">36.90%</strong><span class="unit">1 − T</span></div>
-        </div>
-        <p class="note">*“Absorbed fraction” here means the fraction of incident light not transmitted. In a real instrument, reflection and scattering can also contribute to optical losses.</p>
       </div>
 
+      <!-- Right Column: Interactive Controls & Presets -->
       <div class="panel">
-        <h2>Build your sample</h2>
-        <p class="sub">Adjust the properties of two independent absorbing components. Set one component to zero to study a single solute.</p>
+        <div class="panel-header">
+          <h2>Sample & Instrument Controls</h2>
+        </div>
+        <p class="sub">Adjust instrument settings and independent absorbing solutes. Both sliders and numeric inputs are bi-directionally linked.</p>
+
         <div class="controls">
-          <div class="control">
-            <div class="control-head"><label for="i0">Incident intensity (I₀)</label><output id="i0Out">100 units</output></div>
-            <input id="i0" type="range" min="20" max="200" step="5" value="100">
-            <div class="range-meta"><span>20</span><span>200</span></div>
+          <!-- Preset Experiments -->
+          <div class="presets-container">
+            <div class="presets-title">Classroom Presets</div>
+            <div class="presets-grid">
+              <button type="button" class="preset-pill" data-preset="default">Standard (X only)</button>
+              <button type="button" class="preset-pill" data-preset="doubleConc">2× Concentration</button>
+              <button type="button" class="preset-pill" data-preset="binary">Binary Mixture (X + Y)</button>
+              <button type="button" class="preset-pill" data-preset="highAbs">High Absorbance (T &lt; 1%)</button>
+              <button type="button" class="preset-pill" data-preset="blank">Pure Solvent Blank</button>
+            </div>
           </div>
+
+          <!-- Incident Intensity (I0) -->
           <div class="control">
-            <div class="control-head"><label for="path">Path length (b)</label><output id="pathOut">1.00 cm</output></div>
-            <input id="path" type="range" min="0.1" max="2" step="0.05" value="1">
-            <div class="range-meta"><span>0.10 cm</span><span>2.00 cm</span></div>
+            <div class="control-head">
+              <label for="i0">Incident Intensity (<i>I</i><sub>0</sub>)</label>
+              <output id="i0Out">100 units</output>
+            </div>
+            <div class="slider-input-group">
+              <input id="i0" type="range" min="20" max="200" step="5" value="100" aria-label="Incident intensity slider">
+              <input id="i0Num" class="number-input" type="number" min="20" max="200" step="5" value="100" aria-label="Incident intensity numeric input">
+            </div>
+            <div class="range-meta"><span>20 units</span><span>200 units</span></div>
           </div>
+
+          <!-- Optical Path Length (b) -->
+          <div class="control">
+            <div class="control-head">
+              <label for="path">Path Length (<i>b</i>)</label>
+              <output id="pathOut">1.00 cm</output>
+            </div>
+            <div class="slider-input-group">
+              <input id="path" type="range" min="0.1" max="2.0" step="0.05" value="1" aria-label="Path length slider">
+              <input id="pathNum" class="number-input" type="number" min="0.1" max="2.0" step="0.05" value="1.00" aria-label="Path length numeric input">
+            </div>
+            <div class="range-meta"><span>0.10 cm (thin cell)</span><span>2.00 cm (wide cell)</span></div>
+          </div>
+
+          <!-- Component X Card -->
           <div class="component">
-            <div class="component-title"><span class="dot"></span>Component X</div>
+            <div class="component-title">
+              <span class="component-badge"><span class="dot"></span>Component X (Solute 1)</span>
+              <span class="component-calc">A<sub>X</sub> = <strong id="axVal">0.2000</strong></span>
+            </div>
             <div class="control">
-              <div class="control-head"><label for="epsX">Molar absorptivity, εX</label><output id="epsXOut">10,000</output></div>
-              <input id="epsX" type="range" min="1000" max="30000" step="500" value="10000">
+              <div class="control-head">
+                <label for="epsX">Molar Absorptivity (<i>ε</i><sub>X</sub>)</label>
+                <output id="epsXOut">10,000</output>
+              </div>
+              <div class="slider-input-group">
+                <input id="epsX" type="range" min="1000" max="30000" step="500" value="10000" aria-label="Molar absorptivity of X slider">
+                <input id="epsXNum" class="number-input" type="number" min="1000" max="30000" step="500" value="10000" aria-label="Molar absorptivity of X numeric input">
+              </div>
               <div class="range-meta"><span>1,000</span><span>30,000 L mol⁻¹ cm⁻¹</span></div>
             </div>
             <div class="control">
-              <div class="control-head"><label for="cX">Concentration, cX</label><output id="cXOut">20.0 µM</output></div>
-              <input id="cX" type="range" min="0" max="100" step="1" value="20">
+              <div class="control-head">
+                <label for="cX">Concentration (<i>c</i><sub>X</sub>)</label>
+                <output id="cXOut">20.0 µM</output>
+              </div>
+              <div class="slider-input-group">
+                <input id="cX" type="range" min="0" max="100" step="1" value="20" aria-label="Concentration of X slider">
+                <input id="cXNum" class="number-input" type="number" min="0" max="100" step="1" value="20" aria-label="Concentration of X numeric input">
+              </div>
               <div class="range-meta"><span>0 µM</span><span>100 µM</span></div>
             </div>
           </div>
+
+          <!-- Component Y Card -->
           <div class="component">
-            <div class="component-title"><span class="dot y"></span>Component Y</div>
+            <div class="component-title">
+              <span class="component-badge"><span class="dot y"></span>Component Y (Solute 2)</span>
+              <span class="component-calc">A<sub>Y</sub> = <strong id="ayVal">0.0000</strong></span>
+            </div>
             <div class="control">
-              <div class="control-head"><label for="epsY">Molar absorptivity, εY</label><output id="epsYOut">5,000</output></div>
-              <input id="epsY" type="range" min="1000" max="30000" step="500" value="5000">
+              <div class="control-head">
+                <label for="epsY">Molar Absorptivity (<i>ε</i><sub>Y</sub>)</label>
+                <output id="epsYOut">5,000</output>
+              </div>
+              <div class="slider-input-group">
+                <input id="epsY" type="range" min="1000" max="30000" step="500" value="5000" aria-label="Molar absorptivity of Y slider">
+                <input id="epsYNum" class="number-input" type="number" min="1000" max="30000" step="500" value="5000" aria-label="Molar absorptivity of Y numeric input">
+              </div>
               <div class="range-meta"><span>1,000</span><span>30,000 L mol⁻¹ cm⁻¹</span></div>
             </div>
             <div class="control">
-              <div class="control-head"><label for="cY">Concentration, cY</label><output id="cYOut">40.0 µM</output></div>
-              <input id="cY" type="range" min="0" max="100" step="1" value="0">
-              <div class="range-meta"><span>0 µM</span><span>100 µM</span></div>
+              <div class="control-head">
+                <label for="cY">Concentration (<i>c</i><sub>Y</sub>)</label>
+                <output id="cYOut">0.0 µM</output>
+              </div>
+              <div class="slider-input-group">
+                <input id="cY" type="range" min="0" max="100" step="1" value="0" aria-label="Concentration of Y slider">
+                <input id="cYNum" class="number-input" type="number" min="0" max="100" step="1" value="0" aria-label="Concentration of Y numeric input">
+              </div>
+              <div class="range-meta"><span>0 µM (Pure X)</span><span>100 µM</span></div>
             </div>
           </div>
-          <button class="reset" id="reset">↺ Reset to example</button>
+
+          <!-- Buttons -->
+          <div class="button-row">
+            <button class="btn" id="reset" type="button">↺ Reset to Default</button>
+            <button class="btn" id="zeroY" type="button">Zero Component Y</button>
+          </div>
         </div>
       </div>
     </section>
 
+    <!-- Educational & Theoretical Sections -->
     <section class="sections">
       <article class="panel content">
-        <h2>The mathematics</h2>
-        <p class="sub">From measured light intensities to a concentration-dependent signal.</p>
+        <h2>The Mathematics</h2>
+        <p class="sub">From measured light intensities to a concentration-dependent analytical signal.</p>
+        
         <h3>1. Transmittance</h3>
         <div class="eq">T = I / I₀</div>
-        <p>Transmittance is the fraction of incident radiant intensity that reaches the detector. It is often reported as percent transmittance: %T = 100 × T.</p>
+        <p>Transmittance is the fraction of incident radiant intensity that passes through the sample without being absorbed. Percent transmittance is %<i>T</i> = 100 × <i>T</i>.</p>
+        
         <h3>2. Absorbance</h3>
         <div class="eq">A = −log₁₀(T) = log₁₀(I₀ / I)</div>
-        <p>Absorbance is a logarithmic measure of attenuation. It is dimensionless; “AU” is a commonly used reporting label, not a physical unit.</p>
-        <h3>3. Beer–Lambert law</h3>
-        <div class="eq">A = εbc</div>
-        <p>For monochromatic light in an ideal homogeneous absorbing solution, absorbance is proportional to molar absorptivity, path length and concentration.</p>
-        <div class="callout">The simulator uses ε in L mol⁻¹ cm⁻¹, b in cm and concentration converted from µM to mol L⁻¹.</div>
-      </article>
-
-      <article class="panel content">
-        <h2>Derivation in four steps</h2>
-        <p class="sub">Why the logarithm appears naturally.</p>
-        <div class="step"><span class="num">1</span><div><strong>A thin layer attenuates light.</strong><p>For a small thickness dx, the intensity loss is proportional to the intensity entering the layer, concentration and thickness: −dI = kIc dx.</p></div></div>
-        <div class="step"><span class="num">2</span><div><strong>Separate variables and integrate.</strong><p>−dI/I = kc dx. Integrating from I₀ to I and from 0 to b gives ln(I₀/I) = kbc.</p></div></div>
-        <div class="step"><span class="num">3</span><div><strong>Convert to common logarithm.</strong><p>Since ln(x) = 2.303 log₁₀(x), log₁₀(I₀/I) = (k/2.303)bc.</p></div></div>
-        <div class="step"><span class="num">4</span><div><strong>Define ε and absorbance.</strong><p>Set ε = k/2.303 and A = log₁₀(I₀/I). Therefore A = εbc.</p></div></div>
-        <div class="equation">
-          <div class="eq">I = I₀e<sup>−kbc</sup></div>
-          <div class="eq">T = e<sup>−kbc</sup></div>
-          <div class="eq"><strong>A = −log₁₀T = εbc</strong></div>
+        <p>Absorbance is a logarithmic measure of attenuation. It is dimensionless; "AU" (Absorbance Units) is an analytical reporting label rather than a physical unit.</p>
+        
+        <h3>3. Beer–Lambert Law</h3>
+        <div class="eq"><strong>A = ε · b · c</strong></div>
+        <p>For monochromatic radiation through an ideal homogeneous solution, absorbance is directly proportional to molar absorptivity (<i>ε</i>), optical path length (<i>b</i>), and solute concentration (<i>c</i>).</p>
+        <div class="callout">
+          <strong>Unit Consistency:</strong> Molar absorptivity <i>ε</i> is expressed in L·mol⁻¹·cm⁻¹, path length <i>b</i> in cm, and concentration <i>c</i> is converted from µM to mol·L⁻¹ (1 µM = 10⁻⁶ M).
         </div>
       </article>
 
       <article class="panel content">
-        <h2>Why absorbances add</h2>
-        <p class="sub">The principle behind classical two-component simultaneous estimation.</p>
-        <p>For independent absorbing species at the same wavelength, the mixture absorbance is the sum of their individual contributions:</p>
-        <div class="eq">A<sub>total</sub> = A<sub>X</sub> + A<sub>Y</sub></div>
-        <div class="eq">A<sub>total</sub> = b(ε<sub>X</sub>c<sub>X</sub> + ε<sub>Y</sub>c<sub>Y</sub>)</div>
-        <p>Transmittances do not add. For ideal independent absorbers, their transmittance factors multiply:</p>
-        <div class="eq">T<sub>mixture</sub> = T<sub>X</sub> × T<sub>Y</sub></div>
-        <div class="callout">This additivity assumes no chemical interaction that changes the absorbing species, and no significant uncorrected scattering, stray light or matrix interference.</div>
+        <h2>Derivation in Four Steps</h2>
+        <p class="sub">Why the exponential attenuation and logarithm arise from differential optics.</p>
+        
+        <div class="step">
+          <span class="num">1</span>
+          <div>
+            <strong>A differential thin layer attenuates light.</strong>
+            <p>Across an infinitesimal slice d<i>x</i>, intensity loss is proportional to incident intensity, concentration, and thickness: −d<i>I</i> = <i>k·I·c</i> d<i>x</i>.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <span class="num">2</span>
+          <div>
+            <strong>Separate variables and integrate.</strong>
+            <p>−∫(d<i>I</i> / <i>I</i>) = <i>kc</i> ∫d<i>x</i> &implies; ln(<i>I</i><sub>0</sub> / <i>I</i>) = <i>kbc</i>.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <span class="num">3</span>
+          <div>
+            <strong>Convert to common base-10 logarithm.</strong>
+            <p>Using ln(<i>u</i>) = 2.3026 log₁₀(<i>u</i>), we obtain log₁₀(<i>I</i><sub>0</sub> / <i>I</i>) = (<i>k</i> / 2.3026)<i>bc</i>.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <span class="num">4</span>
+          <div>
+            <strong>Define molar absorptivity <i>ε</i> and Absorbance <i>A</i>.</strong>
+            <p>Setting <i>ε</i> = <i>k</i> / 2.3026 yields <i>A</i> = −log₁₀(<i>T</i>) = <i>εbc</i>.</p>
+          </div>
+        </div>
+        
+        <div class="equation">
+          <div class="eq">I = I₀ · 10<sup>−εbc</sup></div>
+          <div class="eq">T = 10<sup>−εbc</sup></div>
+          <div class="eq"><strong>A = εbc</strong></div>
+        </div>
       </article>
 
       <article class="panel content">
-        <h2>Check your understanding</h2>
-        <p class="sub">A short concept check. Select an answer to see the explanation.</p>
-        <div class="quiz">
-          <strong>Two independent solutes have absorbances 0.20 and 0.30 at the same wavelength. What is the mixture absorbance?</strong>
-          <button data-answer="wrong">0.06</button>
-          <button data-answer="correct">0.50</button>
-          <button data-answer="wrong">0.25</button>
-          <div class="feedback" id="quizFeedback" aria-live="polite">Choose an answer.</div>
+        <h2>Why Absorbances Add</h2>
+        <p class="sub">The mathematical foundation of multi-component simultaneous spectrophotometry.</p>
+        <p>When multiple absorbing chemical species coexist without chemical reaction or spectral cross-coupling at a given wavelength, their total absorbance is strictly additive:</p>
+        <div class="eq">A<sub>total</sub> = A<sub>X</sub> + A<sub>Y</sub></div>
+        <div class="eq">A<sub>total</sub> = b(ε<sub>X</sub>c<sub>X</sub> + ε<sub>Y</sub>c<sub>Y</sub>)</div>
+        <p>In contrast, <strong>transmittances never add</strong>; their attenuation factors multiply:</p>
+        <div class="eq">T<sub>mixture</sub> = T<sub>X</sub> × T<sub>Y</sub></div>
+        <div class="callout">
+          <strong>Binary Analysis in Practice:</strong> By recording total absorbances at two distinct wavelengths (<i>λ</i>₁ and <i>λ</i>₂), two simultaneous linear equations can be solved to determine individual concentrations <i>c</i><sub>X</sub> and <i>c</i><sub>Y</sub>.
+        </div>
+      </article>
+
+      <article class="panel content">
+        <h2>Check Your Understanding</h2>
+        <p class="sub">Test your grasp of the principles. Select an option to see the analytical explanation.</p>
+        
+        <div class="quiz" id="quizContainer">
+          <div class="quiz-question">Question: Two independent solutes have individual absorbances of 0.20 and 0.30 at 520 nm in a 1 cm cuvette. What is the total mixture absorbance?</div>
+          <button type="button" data-answer="wrong" data-feedback="Not quite. Transmittances multiply, but absorbances add linearly: 0.20 + 0.30 = 0.50 AU.">
+            <span>A) 0.06 AU</span>
+          </button>
+          <button type="button" data-answer="correct" data-feedback="Correct! By the additivity principle of the Beer–Lambert law, total absorbance is the algebraic sum of the component absorbances: 0.20 + 0.30 = 0.50 AU.">
+            <span>B) 0.50 AU</span>
+          </button>
+          <button type="button" data-answer="wrong" data-feedback="Incorrect. Absorbances sum directly (0.20 + 0.30 = 0.50 AU), rather than averaging.">
+            <span>C) 0.25 AU</span>
+          </button>
+          <div class="feedback" id="quizFeedback" aria-live="polite">Select an option above to check your answer.</div>
         </div>
       </article>
     </section>
 
-    <section class="panel content" style="margin-top:18px">
-      <h2>Assumptions and limitations</h2>
-      <p>The Beer–Lambert law is a model with a defined domain of validity. This interactive tool is educational, not a substitute for instrument qualification or analytical method validation.</p>
-      <div class="sections" style="margin-top:8px">
+    <!-- Assumptions and Limitations -->
+    <section class="panel content" style="margin-top:22px">
+      <h2>Assumptions and Limitations of the Beer–Lambert Law</h2>
+      <p>The Beer–Lambert law represents a physical model with clear boundaries of validity. Real laboratory spectrophotometers encounter physical and chemical deviations:</p>
+      
+      <div class="sections" style="margin-top:12px">
         <div>
-          <h3>Model assumptions</h3>
-          <ul>
-            <li>Monochromatic or sufficiently narrow-band radiation.</li>
-            <li>Homogeneous, clear solution with negligible scattering.</li>
-            <li>Absorbing species behave independently.</li>
-            <li>Concentration is within a range where the response is linear.</li>
-            <li>Path length and absorptivity remain constant.</li>
+          <h3>Fundamental Assumptions</h3>
+          <ul style="color:var(--text-secondary); line-height:1.6; padding-left:20px;">
+            <li><strong>Monochromatic radiation:</strong> The incident beam consists of a single wavelength or a bandwidth narrower than the absorption band.</li>
+            <li><strong>Homogeneous medium:</strong> Solute molecules are uniformly dispersed with negligible particulate scattering or turbidity.</li>
+            <li><strong>Independent absorbers:</strong> Solute particles do not electrostatically or chemically interact with one another.</li>
+            <li><strong>Parallel rays:</strong> Light rays travel along parallel trajectories perpendicular to the cuvette faces.</li>
           </ul>
         </div>
         <div>
-          <h3>Real-world deviations</h3>
-          <ul>
-            <li>High concentrations and molecular interactions.</li>
-            <li>Changes in pH, ionisation or chemical speciation.</li>
-            <li>Stray light, finite spectral bandwidth and detector limitations.</li>
-            <li>Turbidity, particulates and scattering.</li>
-            <li>Absorption by solvents, excipients or degradation products.</li>
+          <h3>Real-World Deviations</h3>
+          <ul style="color:var(--text-secondary); line-height:1.6; padding-left:20px;">
+            <li><strong>High concentrations:</strong> At <i>c</i> &gt; 10 mM, intermolecular distances diminish, perturbing charge distribution and altering <i>ε</i>.</li>
+            <li><strong>Chemical equilibria:</strong> Solute association, dissociation, tautomerization, or pH-dependent protonation changes the absorbing species.</li>
+            <li><strong>Instrumental stray light:</strong> Radiation of spurious wavelengths hitting the detector causes negative deviations at high absorbances (<i>A</i> &gt; 2.0).</li>
+            <li><strong>Solvent absorption & refractive index:</strong> Large shifts in solute concentration alter solution refractive index, perturbing <i>ε</i>.</li>
           </ul>
         </div>
       </div>
-      <p class="note">Educational note: “1 − T” is the fraction of incident light not transmitted. It should not automatically be interpreted as true molecular absorption if reflection or scattering is appreciable.</p>
+      <p class="note">
+        Educational Note: In high-performance UV-Vis spectroscopy, standard working absorbance is typically maintained between 0.1 and 1.5 AU to minimise photometric detector noise and stray light errors.
+      </p>
     </section>
   </main>
 
-  <footer class="wrap">Light Lab · An open educational exercise in UV–Visible spectroscopy · No data are uploaded or stored.</footer>
+  <footer class="wrap">
+    Light Lab · Interactive Spectrophotometry & Beer–Lambert Simulation · Built for Analytical Chemistry & Spectroscopy Education.
+  </footer>
 
   <script>
     (() => {
       "use strict";
-      const $ = (id) => document.getElementById(id);
-      const ids = ["i0", "path", "epsX", "cX", "epsY", "cY"];
-      const photonBox = $("photons");
-      for (let n = 0; n < 18; n++) {
-        const p = document.createElement("span");
-        p.className = "photon";
-        photonBox.appendChild(p);
+
+      // DOM helpers
+      const $ = id => document.getElementById(id);
+      const query = sel => document.querySelector(sel);
+      const queryAll = sel => document.querySelectorAll(sel);
+
+      // State object
+      const state = {
+        i0: 100,
+        path: 1.0,
+        epsX: 10000,
+        cX: 20.0,
+        epsY: 5000,
+        cY: 0.0,
+        graphMode: "AvsC", // 'AvsC', 'TvsC', 'AvsB'
+        theme: "light"
+      };
+
+      // Photon particles simulation
+      const photonsTrack = $("photonsTrack");
+      const photonCount = 20;
+      const photons = [];
+
+      for (let i = 0; i < photonCount; i++) {
+        const dot = document.createElement("span");
+        dot.className = "photon-dot";
+        photonsTrack.appendChild(dot);
+        photons.push({
+          el: dot,
+          progress: i / photonCount,
+          speed: 0.0035 + Math.random() * 0.001
+        });
       }
-      const photons = [...photonBox.children];
 
+      // Formatting helper
       const fmt = (n, digits = 3) => Number.isFinite(n) ? n.toFixed(digits) : "—";
-      const num = id => Number($(id).value);
 
-      function update() {
-        const I0 = num("i0");
-        const b = num("path");
-        const epsX = num("epsX");
-        const epsY = num("epsY");
-        const cX_uM = num("cX");
-        const cY_uM = num("cY");
-        const cX = cX_uM * 1e-6; // µmol/L to mol/L
-        const cY = cY_uM * 1e-6;
+      // Synchronize paired range slider & number input
+      const controls = [
+        { id: "i0", key: "i0", float: false },
+        { id: "path", key: "path", float: true },
+        { id: "epsX", key: "epsX", float: false },
+        { id: "cX", key: "cX", float: true },
+        { id: "epsY", key: "epsY", float: false },
+        { id: "cY", key: "cY", float: true }
+      ];
 
-        // Beer–Lambert contributions: A = εbc.
-        const AX = epsX * b * cX;
-        const AY = epsY * b * cY;
-        const A = AX + AY;
-        const T = Math.pow(10, -A);
-        const I = I0 * T;
-        const notTransmitted = (1 - T) * 100;
+      controls.forEach(ctrl => {
+        const rangeEl = $(ctrl.id);
+        const numEl = $(`${ctrl.id}Num`);
 
-        $("i0Out").textContent = `${fmt(I0, 0)} units`;
-        $("pathOut").textContent = `${fmt(b, 2)} cm`;
+        const syncVal = (val) => {
+          let numVal = ctrl.float ? parseFloat(val) : parseInt(val, 10);
+          if (isNaN(numVal)) return;
+
+          const min = parseFloat(rangeEl.min);
+          const max = parseFloat(rangeEl.max);
+          numVal = Math.min(Math.max(numVal, min), max);
+
+          state[ctrl.key] = numVal;
+          rangeEl.value = numVal;
+          numEl.value = ctrl.float ? (ctrl.key === "path" ? numVal.toFixed(2) : numVal.toFixed(1)) : numVal;
+          updateSimulation();
+        };
+
+        rangeEl.addEventListener("input", e => syncVal(e.target.value));
+        numEl.addEventListener("input", e => syncVal(e.target.value));
+        numEl.addEventListener("change", e => syncVal(e.target.value));
+      });
+
+      // Core calculation logic
+      function calculateBeerLambert() {
+        const { i0, path, epsX, cX, epsY, cY } = state;
+
+        // Convert concentration from µM (µmol/L) to M (mol/L)
+        const cX_M = cX * 1e-6;
+        const cY_M = cY * 1e-6;
+
+        const AX = epsX * path * cX_M;
+        const AY = epsY * path * cY_M;
+        const Atotal = AX + AY;
+        const T = Math.pow(10, -Atotal);
+        const I = i0 * T;
+        const notTransmittedPct = (1 - T) * 100;
+
+        return { AX, AY, Atotal, T, I, notTransmittedPct };
+      }
+
+      // Update UI elements
+      function updateSimulation() {
+        const { i0, path, epsX, cX, epsY, cY } = state;
+        const { AX, AY, Atotal, T, I, notTransmittedPct } = calculateBeerLambert();
+
+        // 1. Text outputs
+        $("i0Out").textContent = `${i0} units`;
+        $("pathOut").textContent = `${fmt(path, 2)} cm`;
         $("epsXOut").textContent = epsX.toLocaleString("en-US");
         $("epsYOut").textContent = epsY.toLocaleString("en-US");
-        $("cXOut").textContent = `${fmt(cX_uM, 1)} µM`;
-        $("cYOut").textContent = `${fmt(cY_uM, 1)} µM`;
+        $("cXOut").textContent = `${fmt(cX, 1)} µM`;
+        $("cYOut").textContent = `${fmt(cY, 1)} µM`;
 
-        $("i0Label").textContent = fmt(I0, 1);
+        $("axVal").textContent = fmt(AX, 4);
+        $("ayVal").textContent = fmt(AY, 4);
+
+        // 2. Instrument indicators
+        $("i0Label").textContent = fmt(i0, 1);
         $("iLabel").textContent = fmt(I, 2);
         $("i0Bar").style.width = "100%";
         $("iBar").style.width = `${Math.max(0, Math.min(100, T * 100))}%`;
+
+        // 3. Results metrics
         $("tResult").textContent = fmt(T, 4);
         $("percentT").textContent = `${fmt(T * 100, 2)}%`;
-        $("aResult").textContent = fmt(A, 4);
-        $("absorbedResult").textContent = `${fmt(notTransmitted, 2)}%`;
+        $("aResult").textContent = fmt(Atotal, 4);
+        $("absorbedResult").textContent = `${fmt(notTransmittedPct, 2)}%`;
 
-        // Illustrative beam: the number of visible photons scales with transmittance.
-        const visible = Math.round(T * photons.length);
-        photons.forEach((p, i) => {
-          p.style.opacity = i < visible ? "1" : ".12";
-          p.style.transform = i < visible ? "scale(1)" : "scale(.55)";
-        });
-        // Visual liquid tint responds to total absorbance; this is illustrative, not a simulated spectrum.
-        const tint = Math.min(0.68, 0.12 + A * 0.18);
-        $("liquid").style.background = `linear-gradient(90deg, rgba(88,215,232,${tint * .45}), rgba(88,215,232,${tint}), rgba(88,215,232,${tint * .45}))`;
+        // 4. Dynamic Cuvette dimension scaling
+        // Path length b ranges 0.1 to 2.0 cm. Map visually from 34px to 160px width
+        const minW = 34;
+        const maxW = 160;
+        const cuvetteW = minW + ((path - 0.1) / (2.0 - 0.1)) * (maxW - minW);
+        $("cuvette").style.width = `${cuvetteW}px`;
+        $("cuvetteWidthLabel").textContent = `b = ${fmt(path, 2)} cm`;
 
-        // Expose values for assistive technology and browser inspection.
-        $("tResult").setAttribute("aria-label", `Transmittance ${fmt(T, 4)}`);
-        $("aResult").setAttribute("aria-label", `Absorbance ${fmt(A, 4)}`);
+        // 5. Solution liquid visual tint (blends Component X cyan and Component Y amber)
+        const totalC = cX + cY;
+        let r = 14, g = 165, bCol = 233; // Default cyan/blue
+        if (totalC > 0) {
+          const ratioX = cX / totalC;
+          const ratioY = cY / totalC;
+          // Component X: Cyan (14, 165, 233)
+          // Component Y: Amber (245, 158, 11)
+          r = Math.round(14 * ratioX + 245 * ratioY);
+          g = Math.round(165 * ratioX + 158 * ratioY);
+          bCol = Math.round(233 * ratioX + 11 * ratioY);
+        }
+        // Tint opacity increases with absorbance
+        const alpha = Math.min(0.85, 0.12 + Atotal * 0.45);
+        $("liquid").style.background = `rgba(${r}, ${g}, ${bCol}, ${alpha})`;
+
+        // 6. Transmitted beam attenuation
+        const transBeam = $("transmittedBeam");
+        const transOpacity = Math.max(0.08, Math.min(1, 0.12 + 0.88 * T));
+        transBeam.style.opacity = transOpacity.toFixed(2);
+        transBeam.style.filter = `blur(${Math.max(0, (1 - T) * 1.5)}px)`;
+        transBeam.style.height = `${Math.max(2, 6 * Math.sqrt(T))}px`;
+
+        // Detector sensor glow
+        const sensorGlow = Math.max(0.1, T);
+        $("detectorSensor").style.opacity = sensorGlow.toFixed(2);
+        $("detectorSensor").style.boxShadow = `0 0 ${12 * sensorGlow}px #38bdf8`;
+
+        // 7. Update Code Mode Python snippet and Numerical Breakdown
+        updateCodeAndCalculations(AX, AY, Atotal, T, I);
+
+        // 8. Redraw chart
+        drawGraph();
       }
 
-      ids.forEach(id => $(id).addEventListener("input", update));
-      $("reset").addEventListener("click", () => {
-        const defaults = {i0:100, path:1, epsX:10000, cX:20, epsY:5000, cY:0};
-        Object.entries(defaults).forEach(([id, value]) => { $(id).value = value; });
-        update();
-      });
+      function updateCodeAndCalculations(AX, AY, Atotal, T, I) {
+        const { i0, path, epsX, cX, epsY, cY } = state;
 
-      document.querySelectorAll(".quiz button").forEach(button => {
-        button.addEventListener("click", () => {
-          const correct = button.dataset.answer === "correct";
-          document.querySelectorAll(".quiz button").forEach(b => b.classList.remove("correct", "wrong"));
-          button.classList.add(correct ? "correct" : "wrong");
-          $("quizFeedback").textContent = correct
-            ? "Correct. Under the Beer–Lambert assumptions, the component absorbances add: 0.20 + 0.30 = 0.50."
-            : "Not quite. Add the absorbances for independent absorbers at the same wavelength: 0.20 + 0.30 = 0.50.";
+        // Python code values
+        $("pyI0").textContent = fmt(i0, 1);
+        $("pyB").textContent = fmt(path, 2);
+        $("pyEpsX").textContent = epsX;
+        $("pyCX").textContent = `${fmt(cX, 1)}e-6`;
+        $("pyEpsY").textContent = epsY;
+        $("pyCY").textContent = `${fmt(cY, 1)}e-6`;
+
+        // Step-by-step breakdown
+        const cX_M_sci = (cX * 1e-6).toExponential(2);
+        const cY_M_sci = (cY * 1e-6).toExponential(2);
+
+        $("calcStepX").textContent = `${epsX.toLocaleString()} × ${fmt(path, 2)} × ${cX_M_sci} = ${fmt(AX, 4)}`;
+        $("calcStepY").textContent = `${epsY.toLocaleString()} × ${fmt(path, 2)} × ${cY_M_sci} = ${fmt(AY, 4)}`;
+        $("calcStepTotal").textContent = `${fmt(AX, 4)} + ${fmt(AY, 4)} = ${fmt(Atotal, 4)} AU`;
+        $("calcStepT").textContent = `10^(-${fmt(Atotal, 4)}) = ${fmt(T, 4)} (${fmt(T * 100, 2)}%)`;
+        $("calcStepI").textContent = `${fmt(i0, 1)} × ${fmt(T, 4)} = ${fmt(I, 2)} units`;
+      }
+
+      // Animation loop for photons
+      function animatePhotons() {
+        const { T } = calculateBeerLambert();
+        const trackW = photonsTrack.clientWidth;
+        const cuvetteW = $("cuvette").offsetWidth;
+        const cuvetteLeft = (trackW - cuvetteW) / 2;
+        const cuvetteRight = cuvetteLeft + cuvetteW;
+
+        photons.forEach(p => {
+          p.progress += p.speed;
+          if (p.progress > 1) {
+            p.progress = 0;
+          }
+
+          const x = p.progress * trackW;
+          p.el.style.left = `${x}px`;
+
+          // Photon attenuation logic:
+          // Before cuvette: full opacity
+          // Inside cuvette: gradual extinction
+          // After cuvette: transmitted fraction T determines visibility
+          if (x < cuvetteLeft) {
+            p.el.style.opacity = "1";
+            p.el.style.transform = "translateY(-50%) scale(1)";
+          } else if (x <= cuvetteRight) {
+            const fracInside = (x - cuvetteLeft) / cuvetteW;
+            const currentT = Math.pow(T, fracInside);
+            p.el.style.opacity = Math.max(0.1, currentT).toFixed(2);
+            p.el.style.transform = `translateY(-50%) scale(${Math.max(0.5, currentT).toFixed(2)})`;
+          } else {
+            // Emerged from cuvette
+            p.el.style.opacity = Math.max(0.08, T).toFixed(2);
+            p.el.style.transform = `translateY(-50%) scale(${Math.max(0.4, Math.sqrt(T)).toFixed(2)})`;
+          }
+        });
+
+        requestAnimationFrame(animatePhotons);
+      }
+      requestAnimationFrame(animatePhotons);
+
+      // Canvas Interactive Curve Drawing
+      const canvas = $("chartCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function drawGraph() {
+        const dpr = window.devicePixelRatio || 1;
+        const rect = canvas.getBoundingClientRect();
+
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.resetTransform();
+        ctx.scale(dpr, dpr);
+
+        const w = rect.width;
+        const h = rect.height;
+
+        ctx.clearRect(0, 0, w, h);
+
+        const padding = { left: 48, right: 24, top: 20, bottom: 32 };
+        const plotW = w - padding.left - padding.right;
+        const plotH = h - padding.top - padding.bottom;
+
+        const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+        const gridColor = isDark ? "#1e293b" : "#f1f5f9";
+        const axisColor = isDark ? "#334155" : "#cbd5e1";
+        const textColor = isDark ? "#94a3b8" : "#64748b";
+        const lineColor = isDark ? "#38bdf8" : "#0284c7";
+        const pointColor = "#f59e0b";
+
+        const { path, epsX, cX, epsY, cY } = state;
+        const { Atotal, T } = calculateBeerLambert();
+
+        // Determine mode range and formulas
+        let xMax = 100;
+        let yMax = 1.0;
+        let xLabel = "cX (µM)";
+        let yLabel = "Absorbance (AU)";
+        let currentX = cX;
+        let currentY = Atotal;
+
+        if (state.graphMode === "AvsC") {
+          xMax = 100;
+          // Calculate max absorbance across 0..100 µM of X
+          const maxA = (epsX * path * 100e-6) + (epsY * path * cY * 1e-6);
+          yMax = Math.max(1.0, Math.ceil(maxA * 10) / 10);
+          xLabel = "cX (µM)";
+          yLabel = "Absorbance, A";
+          currentX = cX;
+          currentY = Atotal;
+          $("graphTitleText").textContent = "Absorbance vs Concentration (Linear Beer's Law)";
+        } else if (state.graphMode === "TvsC") {
+          xMax = 100;
+          yMax = 1.0;
+          xLabel = "cX (µM)";
+          yLabel = "Transmittance, T";
+          currentX = cX;
+          currentY = T;
+          $("graphTitleText").textContent = "Transmittance vs Concentration (Exponential Decay)";
+        } else if (state.graphMode === "AvsB") {
+          xMax = 2.0;
+          const maxA = 2.0 * (epsX * (cX * 1e-6) + epsY * (cY * 1e-6));
+          yMax = Math.max(1.0, Math.ceil(maxA * 10) / 10);
+          xLabel = "Path length, b (cm)";
+          yLabel = "Absorbance, A";
+          currentX = path;
+          currentY = Atotal;
+          $("graphTitleText").textContent = "Absorbance vs Path Length (Direct Linearity)";
+        }
+
+        // Draw gridlines
+        ctx.strokeStyle = gridColor;
+        ctx.lineWidth = 1;
+        const gridXCount = 5;
+        const gridYCount = 4;
+
+        ctx.fillStyle = textColor;
+        ctx.font = "10px Inter, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "top";
+
+        // X grid and ticks
+        for (let i = 0; i <= gridXCount; i++) {
+          const xVal = (xMax / gridXCount) * i;
+          const px = padding.left + (i / gridXCount) * plotW;
+          ctx.beginPath();
+          ctx.moveTo(px, padding.top);
+          ctx.lineTo(px, padding.top + plotH);
+          ctx.stroke();
+
+          ctx.fillText(xVal.toFixed(state.graphMode === "AvsB" ? 1 : 0), px, padding.top + plotH + 6);
+        }
+
+        // Y grid and ticks
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        for (let j = 0; j <= gridYCount; j++) {
+          const yVal = (yMax / gridYCount) * j;
+          const py = padding.top + plotH - (j / gridYCount) * plotH;
+          ctx.beginPath();
+          ctx.moveTo(padding.left, py);
+          ctx.lineTo(padding.left + plotW, py);
+          ctx.stroke();
+
+          ctx.fillText(yVal.toFixed(state.graphMode === "TvsC" ? 2 : 2), padding.left - 6, py);
+        }
+
+        // Axis border lines
+        ctx.strokeStyle = axisColor;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, padding.top);
+        ctx.lineTo(padding.left, padding.top + plotH);
+        ctx.lineTo(padding.left + plotW, padding.top + plotH);
+        ctx.stroke();
+
+        // Axis labels
+        ctx.fillStyle = textColor;
+        ctx.font = "11px Inter, system-ui, sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(xLabel, padding.left + plotW / 2, h - 8);
+
+        ctx.save();
+        ctx.translate(14, padding.top + plotH / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.textAlign = "center";
+        ctx.fillText(yLabel, 0, 0);
+        ctx.restore();
+
+        // Draw curve
+        ctx.beginPath();
+        ctx.strokeStyle = lineColor;
+        ctx.lineWidth = 2.5;
+
+        const steps = 100;
+        for (let s = 0; s <= steps; s++) {
+          const frac = s / steps;
+          const sampleX = frac * xMax;
+          let sampleY = 0;
+
+          if (state.graphMode === "AvsC") {
+            sampleY = (epsX * path * (sampleX * 1e-6)) + (epsY * path * (cY * 1e-6));
+          } else if (state.graphMode === "TvsC") {
+            const tempA = (epsX * path * (sampleX * 1e-6)) + (epsY * path * (cY * 1e-6));
+            sampleY = Math.pow(10, -tempA);
+          } else if (state.graphMode === "AvsB") {
+            sampleY = sampleX * (epsX * (cX * 1e-6) + epsY * (cY * 1e-6));
+          }
+
+          const plotX = padding.left + (sampleX / xMax) * plotW;
+          const plotY = padding.top + plotH - (Math.min(sampleY, yMax) / yMax) * plotH;
+
+          if (s === 0) ctx.moveTo(plotX, plotY);
+          else ctx.lineTo(plotX, plotY);
+        }
+        ctx.stroke();
+
+        // Highlight current operating point
+        const pointPx = padding.left + Math.max(0, Math.min(1, currentX / xMax)) * plotW;
+        const pointPy = padding.top + plotH - Math.max(0, Math.min(1, currentY / yMax)) * plotH;
+
+        // Glowing outer halo
+        ctx.beginPath();
+        ctx.arc(pointPx, pointPy, 9, 0, 2 * Math.PI);
+        ctx.fillStyle = "rgba(245, 158, 11, 0.25)";
+        ctx.fill();
+
+        // Solid circle
+        ctx.beginPath();
+        ctx.arc(pointPx, pointPy, 5, 0, 2 * Math.PI);
+        ctx.fillStyle = pointColor;
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Point coordinate badge
+        ctx.fillStyle = isDark ? "#ffffff" : "#0f172a";
+        ctx.font = "bold 10px Inter, system-ui, sans-serif";
+        ctx.textAlign = pointPx > w - 80 ? "right" : "left";
+        const badgeX = pointPx > w - 80 ? pointPx - 10 : pointPx + 10;
+        ctx.fillText(`(${fmt(currentX, 1)}, ${fmt(currentY, 3)})`, badgeX, pointPy - 6);
+      }
+
+      window.addEventListener("resize", drawGraph);
+
+      // Graph mode switchers
+      queryAll(".graph-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          queryAll(".graph-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          state.graphMode = btn.dataset.graph;
+          drawGraph();
         });
       });
 
-      update();
+      // Tab switcher: Visual Simulator vs Code Mode
+      const tabVisual = $("tabVisual");
+      const tabCode = $("tabCode");
+      const visualContainer = $("visualModeContainer");
+      const codeContainer = $("codeModeContainer");
+
+      tabVisual.addEventListener("click", () => {
+        tabVisual.classList.add("active");
+        tabVisual.setAttribute("aria-selected", "true");
+        tabCode.classList.remove("active");
+        tabCode.setAttribute("aria-selected", "false");
+        visualContainer.style.display = "block";
+        codeContainer.classList.remove("active");
+        drawGraph();
+      });
+
+      tabCode.addEventListener("click", () => {
+        tabCode.classList.add("active");
+        tabCode.setAttribute("aria-selected", "true");
+        tabVisual.classList.remove("active");
+        tabVisual.setAttribute("aria-selected", "false");
+        visualContainer.style.display = "none";
+        codeContainer.classList.add("active");
+      });
+
+      // Copy Python snippet button
+      $("copyCodeBtn").addEventListener("click", () => {
+        const { i0, path, epsX, cX, epsY, cY } = state;
+        const codeText = `import numpy as np
+import matplotlib.pyplot as plt
+
+# Beer–Lambert Law parameters
+I0 = ${fmt(i0, 1)}          # Incident radiant intensity
+b = ${fmt(path, 2)}            # Optical path length (cm)
+eps_X = ${epsX}       # Molar absorptivity of X (L / (mol * cm))
+c_X = ${fmt(cX, 1)}e-6       # Concentration of X (mol / L)
+eps_Y = ${epsY}        # Molar absorptivity of Y (L / (mol * cm))
+c_Y = ${fmt(cY, 1)}e-6        # Concentration of Y (mol / L)
+
+# Beer–Lambert calculations
+A_X = eps_X * b * c_X
+A_Y = eps_Y * b * c_Y
+A_total = A_X + A_Y
+T = 10 ** (-A_total)
+I = I0 * T
+
+print(f"Component X Absorbance: {A_X:.4f} AU")
+print(f"Component Y Absorbance: {A_Y:.4f} AU")
+print(f"Total Absorbance:        {A_total:.4f} AU")
+print(f"Transmittance:           {T:.4f} ({T*100:.2f}%)")
+print(f"Transmitted Intensity:   {I:.2f} units")`;
+
+        navigator.clipboard.writeText(codeText).then(() => {
+          $("copyText").textContent = "Copied!";
+          $("copyIcon").textContent = "✓";
+          setTimeout(() => {
+            $("copyText").textContent = "Copy Python";
+            $("copyIcon").textContent = "📋";
+          }, 2000);
+        });
+      });
+
+      // Classroom presets
+      const presets = {
+        default: { i0: 100, path: 1.0, epsX: 10000, cX: 20.0, epsY: 5000, cY: 0.0 },
+        doubleConc: { i0: 100, path: 1.0, epsX: 10000, cX: 40.0, epsY: 5000, cY: 0.0 },
+        binary: { i0: 100, path: 1.0, epsX: 10000, cX: 20.0, epsY: 5000, cY: 20.0 },
+        highAbs: { i0: 100, path: 2.0, epsX: 15000, cX: 75.0, epsY: 5000, cY: 0.0 },
+        blank: { i0: 100, path: 1.0, epsX: 10000, cX: 0.0, epsY: 5000, cY: 0.0 }
+      };
+
+      queryAll(".preset-pill").forEach(pill => {
+        pill.addEventListener("click", () => {
+          const preset = presets[pill.dataset.preset];
+          if (!preset) return;
+          applySettings(preset);
+        });
+      });
+
+      function applySettings(cfg) {
+        Object.entries(cfg).forEach(([k, v]) => {
+          state[k] = v;
+          const rangeEl = $(k);
+          const numEl = $(`${k}Num`);
+          if (rangeEl) rangeEl.value = v;
+          if (numEl) numEl.value = k === "path" ? v.toFixed(2) : (k === "cX" || k === "cY" ? v.toFixed(1) : v);
+        });
+        updateSimulation();
+      }
+
+      // Reset and Zero Y buttons
+      $("reset").addEventListener("click", () => applySettings(presets.default));
+      $("zeroY").addEventListener("click", () => {
+        applySettings({ cY: 0 });
+      });
+
+      // Theme toggle (Light / Dark)
+      const themeToggle = $("themeToggle");
+      const themeIcon = $("themeIcon");
+      const themeText = $("themeText");
+
+      function setTheme(t) {
+        state.theme = t;
+        document.documentElement.setAttribute("data-theme", t);
+        const metaTheme = query('meta[name="theme-color"]');
+        if (t === "dark") {
+          themeIcon.textContent = "🌙";
+          themeText.textContent = "Dark";
+          if (metaTheme) metaTheme.setAttribute("content", "#0b1220");
+        } else {
+          themeIcon.textContent = "☀️";
+          themeText.textContent = "Light";
+          if (metaTheme) metaTheme.setAttribute("content", "#ffffff");
+        }
+        drawGraph();
+      }
+
+      themeToggle.addEventListener("click", () => {
+        const nextTheme = state.theme === "light" ? "dark" : "light";
+        setTheme(nextTheme);
+      });
+
+      // Quiz interaction
+      queryAll("#quizContainer button").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const isCorrect = btn.dataset.answer === "correct";
+          queryAll("#quizContainer button").forEach(b => b.classList.remove("correct", "wrong"));
+          btn.classList.add(isCorrect ? "correct" : "wrong");
+          $("quizFeedback").textContent = btn.dataset.feedback;
+        });
+      });
+
+      // Initial run
+      updateSimulation();
     })();
   </script>
 </body>
