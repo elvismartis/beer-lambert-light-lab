@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101827">
+  <meta name="description" content="An interactive educational simulator for transmittance, absorbance, and the Beer–Lambert law.">
+  <title>Light Lab — Beer–Lambert Simulator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0b1220;
+      --panel: #121d30;
+      --panel-2: #17253b;
+      --line: #2b3b54;
+      --text: #edf4ff;
+      --muted: #a9b8cc;
+      --cyan: #58d7e8;
+      --blue: #7ba7ff;
+      --gold: #ffc66d;
+      --green: #65d6a4;
+      --red: #ff8d91;
+      --shadow: 0 18px 45px rgba(0,0,0,.22);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      background:
+        radial-gradient(circle at 12% 0%, rgba(88,215,232,.13), transparent 28rem),
+        radial-gradient(circle at 95% 12%, rgba(123,167,255,.12), transparent 25rem), var(--bg);
+      line-height: 1.55;
+    }
+    button, input { font: inherit; }
+    .wrap { width: min(1160px, calc(100% - 32px)); margin: 0 auto; }
+    header { padding: 34px 0 22px; }
+    .eyebrow { color: var(--cyan); text-transform: uppercase; letter-spacing: .15em; font-size: .76rem; font-weight: 800; }
+    h1 { margin: 8px 0 8px; font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.05; letter-spacing: -.04em; }
+    .intro { max-width: 760px; color: var(--muted); font-size: 1.05rem; margin: 0; }
+    .tag { display:inline-flex; align-items:center; border:1px solid var(--line); background:rgba(255,255,255,.035); border-radius:999px; padding:5px 10px; color:var(--muted); font-size:.78rem; margin: 16px 6px 0 0; }
+    main { padding-bottom: 48px; }
+    .layout { display:grid; grid-template-columns: minmax(0, 1.05fr) minmax(320px, .95fr); gap:18px; align-items:start; }
+    .panel { background:linear-gradient(160deg, rgba(23,37,59,.96), rgba(18,29,48,.96)); border:1px solid var(--line); border-radius:20px; padding:22px; box-shadow:var(--shadow); }
+    .panel h2 { margin:0 0 5px; font-size:1.18rem; letter-spacing:-.02em; }
+    .sub { color:var(--muted); font-size:.9rem; margin:0 0 18px; }
+    .beam-stage {
+      border:1px solid #344760; border-radius:16px; padding:16px; overflow:hidden;
+      background:linear-gradient(180deg, #0c1728, #101d31);
+    }
+    .beam-labels { display:flex; justify-content:space-between; gap:12px; color:var(--muted); font-size:.78rem; margin-bottom:10px; }
+    .beam-track { height:112px; position:relative; display:flex; align-items:center; }
+    .beam-line { position:absolute; left:4%; right:4%; height:5px; top:50%; transform:translateY(-50%); background:linear-gradient(90deg, rgba(255,198,109,.15), rgba(255,198,109,.85)); border-radius:10px; }
+    .beam-line::before { content:""; position:absolute; inset:-8px 0; background:linear-gradient(90deg, transparent, rgba(255,198,109,.18), transparent); filter:blur(7px); }
+    .photons { position:absolute; left:4%; right:4%; top:50%; transform:translateY(-50%); height:1px; display:flex; justify-content:space-between; pointer-events:none; }
+    .photon { width:7px; height:7px; border-radius:50%; background:#ffe0a6; box-shadow:0 0 12px 3px rgba(255,198,109,.65); transition:opacity .25s; }
+    .cuvette {
+      position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+      width:104px; height:92px; border:3px solid rgba(207,231,255,.72); border-top:0;
+      border-radius:0 0 12px 12px; background:rgba(88,215,232,.13); overflow:hidden;
+      box-shadow:inset 0 -10px 22px rgba(88,215,232,.08), 0 0 20px rgba(88,215,232,.08);
+    }
+    .cuvette::before { content:""; position:absolute; top:0; left:-2px; right:-2px; height:3px; background:#cfe7ff; }
+    .liquid { position:absolute; bottom:0; left:0; right:0; height:72%; background:linear-gradient(90deg, rgba(88,215,232,.18), rgba(88,215,232,.48), rgba(88,215,232,.18)); transition:background .25s; }
+    .cuvette-label { position:absolute; left:50%; top:calc(50% + 54px); transform:translateX(-50%); color:var(--muted); font-size:.7rem; white-space:nowrap; }
+    .beam-end { position:absolute; right:3%; width:8px; height:42px; border-radius:6px; background:#9fb7d6; box-shadow:0 0 12px rgba(123,167,255,.4); }
+    .intensity-bars { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+    .bar-card { background:rgba(255,255,255,.035); border:1px solid var(--line); padding:12px; border-radius:12px; }
+    .bar-head { display:flex; justify-content:space-between; gap:8px; color:var(--muted); font-size:.78rem; }
+    .bar-value { color:var(--text); font-weight:800; font-size:1.05rem; font-variant-numeric:tabular-nums; }
+    .meter { height:9px; background:#263750; border-radius:20px; overflow:hidden; margin-top:9px; }
+    .meter > span { display:block; height:100%; border-radius:20px; width:0; transition:width .2s ease; background:linear-gradient(90deg,var(--gold),#ffecb7); }
+    .meter.trans > span { background:linear-gradient(90deg,var(--cyan),var(--blue)); }
+    .controls { display:grid; gap:17px; }
+    .control { display:grid; gap:7px; }
+    .control-head { display:flex; justify-content:space-between; gap:12px; align-items:baseline; }
+    label { font-weight:700; font-size:.9rem; }
+    output { color:var(--cyan); font-weight:800; font-variant-numeric:tabular-nums; }
+    input[type="range"] { width:100%; accent-color:var(--cyan); cursor:pointer; }
+    .range-meta { display:flex; justify-content:space-between; color:var(--muted); font-size:.72rem; }
+    .component { border:1px solid var(--line); padding:14px; border-radius:14px; background:rgba(255,255,255,.025); }
+    .component-title { display:flex; align-items:center; gap:9px; margin-bottom:12px; font-weight:800; }
+    .dot { width:10px; height:10px; border-radius:50%; background:var(--cyan); box-shadow:0 0 10px currentColor; }
+    .dot.y { background:var(--blue); }
+    .component .control + .control { margin-top:12px; }
+    .results { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:16px; }
+    .metric { padding:13px; border-radius:13px; background:#0e192a; border:1px solid var(--line); min-width:0; }
+    .metric small { color:var(--muted); display:block; font-size:.72rem; }
+    .metric strong { display:block; font-size:1.28rem; margin-top:3px; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+    .metric .unit { color:var(--muted); font-size:.72rem; }
+    .equation { background:#0d1727; border:1px solid var(--line); border-radius:14px; padding:15px; margin-top:14px; overflow-x:auto; }
+    .eq { font-family:Georgia, "Times New Roman", serif; font-size:1.12rem; text-align:center; margin:7px 0; }
+    .eq strong { color:var(--gold); }
+    .note { color:var(--muted); font-size:.83rem; margin:10px 0 0; }
+    .sections { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:18px; }
+    .content p { color:var(--muted); margin:.55rem 0; }
+    .content h3 { margin:18px 0 5px; font-size:1rem; }
+    .step { display:flex; gap:12px; margin:13px 0; align-items:flex-start; }
+    .num { flex:0 0 27px; height:27px; display:grid; place-items:center; border-radius:50%; background:rgba(88,215,232,.13); color:var(--cyan); font-weight:800; font-size:.8rem; }
+    code, .math { color:#f6d69d; background:rgba(255,198,109,.08); border-radius:5px; padding:2px 5px; }
+    .callout { border-left:3px solid var(--cyan); padding:10px 13px; background:rgba(88,215,232,.07); border-radius:0 10px 10px 0; color:var(--muted); margin-top:14px; }
+    .quiz { display:grid; gap:12px; }
+    .quiz button, .reset {
+      border:1px solid var(--line); border-radius:10px; padding:9px 12px; color:var(--text);
+      background:#1b2b43; cursor:pointer; text-align:left;
+    }
+    .quiz button:hover, .reset:hover { border-color:var(--cyan); }
+    .quiz button.correct { border-color:var(--green); background:rgba(101,214,164,.1); }
+    .quiz button.wrong { border-color:var(--red); background:rgba(255,141,145,.1); }
+    .feedback { min-height:24px; color:var(--muted); font-size:.85rem; }
+    footer { padding:0 0 32px; color:var(--muted); font-size:.8rem; text-align:center; }
+    a { color:var(--cyan); }
+    @media (max-width:850px) { .layout,.sections { grid-template-columns:1fr; } }
+    @media (max-width:520px) {
+      .wrap { width:min(100% - 20px, 1160px); }
+      header { padding-top:25px; }
+      .panel { padding:16px; border-radius:16px; }
+      .results { grid-template-columns:1fr 1fr; }
+      .results .metric:last-child { grid-column:span 2; }
+      .intensity-bars { grid-template-columns:1fr; }
+      .beam-track { height:100px; }
+      .cuvette { width:82px; height:82px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *,*::before,*::after { transition:none !important; } }
+  </style>
+</head>
+<body>
+  <header class="wrap">
+    <div class="eyebrow">Interactive analytical chemistry</div>
+    <h1>Light Lab <span style="color:var(--cyan)">●</span></h1>
+    <p class="intro">Explore how a solution attenuates light. Change concentration, path length and absorptivity to see transmittance fall and absorbance rise according to the Beer–Lambert law.</p>
+    <span class="tag">Beer–Lambert law</span><span class="tag">Absorbance & transmittance</span><span class="tag">Binary mixtures</span>
+  </header>
+
+  <main class="wrap">
+    <section class="layout">
+      <div class="panel">
+        <h2>Inside the cuvette</h2>
+        <p class="sub">A conceptual view of incident light, the absorbing sample and transmitted light.</p>
+        <div class="beam-stage" aria-label="Animated illustration of light passing through a sample cuvette">
+          <div class="beam-labels"><span>Incident beam · I₀</span><span>Detector · I</span></div>
+          <div class="beam-track">
+            <div class="beam-line"></div>
+            <div class="photons" id="photons"></div>
+            <div class="cuvette"><div class="liquid" id="liquid"></div></div>
+            <div class="cuvette-label">absorbing solution</div>
+            <div class="beam-end"></div>
+          </div>
+        </div>
+        <div class="intensity-bars">
+          <div class="bar-card">
+            <div class="bar-head"><span>Incident intensity</span><span class="bar-value" id="i0Label">100.0</span></div>
+            <div class="meter"><span id="i0Bar" style="width:100%"></span></div>
+          </div>
+          <div class="bar-card">
+            <div class="bar-head"><span>Transmitted intensity</span><span class="bar-value" id="iLabel">63.1</span></div>
+            <div class="meter trans"><span id="iBar" style="width:63.1%"></span></div>
+          </div>
+        </div>
+        <div class="results" aria-live="polite">
+          <div class="metric"><small>Transmittance, T</small><strong id="tResult">0.6310</strong><span class="unit" id="percentT">63.10%</span></div>
+          <div class="metric"><small>Absorbance, A</small><strong id="aResult">0.2000</strong><span class="unit">AU (dimensionless)</span></div>
+          <div class="metric"><small>Absorbed fraction*</small><strong id="absorbedResult">36.90%</strong><span class="unit">1 − T</span></div>
+        </div>
+        <p class="note">*“Absorbed fraction” here means the fraction of incident light not transmitted. In a real instrument, reflection and scattering can also contribute to optical losses.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Build your sample</h2>
+        <p class="sub">Adjust the properties of two independent absorbing components. Set one component to zero to study a single solute.</p>
+        <div class="controls">
+          <div class="control">
+            <div class="control-head"><label for="i0">Incident intensity (I₀)</label><output id="i0Out">100 units</output></div>
+            <input id="i0" type="range" min="20" max="200" step="5" value="100">
+            <div class="range-meta"><span>20</span><span>200</span></div>
+          </div>
+          <div class="control">
+            <div class="control-head"><label for="path">Path length (b)</label><output id="pathOut">1.00 cm</output></div>
+            <input id="path" type="range" min="0.1" max="2" step="0.05" value="1">
+            <div class="range-meta"><span>0.10 cm</span><span>2.00 cm</span></div>
+          </div>
+          <div class="component">
+            <div class="component-title"><span class="dot"></span>Component X</div>
+            <div class="control">
+              <div class="control-head"><label for="epsX">Molar absorptivity, εX</label><output id="epsXOut">10,000</output></div>
+              <input id="epsX" type="range" min="1000" max="30000" step="500" value="10000">
+              <div class="range-meta"><span>1,000</span><span>30,000 L mol⁻¹ cm⁻¹</span></div>
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="cX">Concentration, cX</label><output id="cXOut">20.0 µM</output></div>
+              <input id="cX" type="range" min="0" max="100" step="1" value="20">
+              <div class="range-meta"><span>0 µM</span><span>100 µM</span></div>
+            </div>
+          </div>
+          <div class="component">
+            <div class="component-title"><span class="dot y"></span>Component Y</div>
+            <div class="control">
+              <div class="control-head"><label for="epsY">Molar absorptivity, εY</label><output id="epsYOut">5,000</output></div>
+              <input id="epsY" type="range" min="1000" max="30000" step="500" value="5000">
+              <div class="range-meta"><span>1,000</span><span>30,000 L mol⁻¹ cm⁻¹</span></div>
+            </div>
+            <div class="control">
+              <div class="control-head"><label for="cY">Concentration, cY</label><output id="cYOut">40.0 µM</output></div>
+              <input id="cY" type="range" min="0" max="100" step="1" value="0">
+              <div class="range-meta"><span>0 µM</span><span>100 µM</span></div>
+            </div>
+          </div>
+          <button class="reset" id="reset">↺ Reset to example</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="sections">
+      <article class="panel content">
+        <h2>The mathematics</h2>
+        <p class="sub">From measured light intensities to a concentration-dependent signal.</p>
+        <h3>1. Transmittance</h3>
+        <div class="eq">T = I / I₀</div>
+        <p>Transmittance is the fraction of incident radiant intensity that reaches the detector. It is often reported as percent transmittance: %T = 100 × T.</p>
+        <h3>2. Absorbance</h3>
+        <div class="eq">A = −log₁₀(T) = log₁₀(I₀ / I)</div>
+        <p>Absorbance is a logarithmic measure of attenuation. It is dimensionless; “AU” is a commonly used reporting label, not a physical unit.</p>
+        <h3>3. Beer–Lambert law</h3>
+        <div class="eq">A = εbc</div>
+        <p>For monochromatic light in an ideal homogeneous absorbing solution, absorbance is proportional to molar absorptivity, path length and concentration.</p>
+        <div class="callout">The simulator uses ε in L mol⁻¹ cm⁻¹, b in cm and concentration converted from µM to mol L⁻¹.</div>
+      </article>
+
+      <article class="panel content">
+        <h2>Derivation in four steps</h2>
+        <p class="sub">Why the logarithm appears naturally.</p>
+        <div class="step"><span class="num">1</span><div><strong>A thin layer attenuates light.</strong><p>For a small thickness dx, the intensity loss is proportional to the intensity entering the layer, concentration and thickness: −dI = kIc dx.</p></div></div>
+        <div class="step"><span class="num">2</span><div><strong>Separate variables and integrate.</strong><p>−dI/I = kc dx. Integrating from I₀ to I and from 0 to b gives ln(I₀/I) = kbc.</p></div></div>
+        <div class="step"><span class="num">3</span><div><strong>Convert to common logarithm.</strong><p>Since ln(x) = 2.303 log₁₀(x), log₁₀(I₀/I) = (k/2.303)bc.</p></div></div>
+        <div class="step"><span class="num">4</span><div><strong>Define ε and absorbance.</strong><p>Set ε = k/2.303 and A = log₁₀(I₀/I). Therefore A = εbc.</p></div></div>
+        <div class="equation">
+          <div class="eq">I = I₀e<sup>−kbc</sup></div>
+          <div class="eq">T = e<sup>−kbc</sup></div>
+          <div class="eq"><strong>A = −log₁₀T = εbc</strong></div>
+        </div>
+      </article>
+
+      <article class="panel content">
+        <h2>Why absorbances add</h2>
+        <p class="sub">The principle behind classical two-component simultaneous estimation.</p>
+        <p>For independent absorbing species at the same wavelength, the mixture absorbance is the sum of their individual contributions:</p>
+        <div class="eq">A<sub>total</sub> = A<sub>X</sub> + A<sub>Y</sub></div>
+        <div class="eq">A<sub>total</sub> = b(ε<sub>X</sub>c<sub>X</sub> + ε<sub>Y</sub>c<sub>Y</sub>)</div>
+        <p>Transmittances do not add. For ideal independent absorbers, their transmittance factors multiply:</p>
+        <div class="eq">T<sub>mixture</sub> = T<sub>X</sub> × T<sub>Y</sub></div>
+        <div class="callout">This additivity assumes no chemical interaction that changes the absorbing species, and no significant uncorrected scattering, stray light or matrix interference.</div>
+      </article>
+
+      <article class="panel content">
+        <h2>Check your understanding</h2>
+        <p class="sub">A short concept check. Select an answer to see the explanation.</p>
+        <div class="quiz">
+          <strong>Two independent solutes have absorbances 0.20 and 0.30 at the same wavelength. What is the mixture absorbance?</strong>
+          <button data-answer="wrong">0.06</button>
+          <button data-answer="correct">0.50</button>
+          <button data-answer="wrong">0.25</button>
+          <div class="feedback" id="quizFeedback" aria-live="polite">Choose an answer.</div>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel content" style="margin-top:18px">
+      <h2>Assumptions and limitations</h2>
+      <p>The Beer–Lambert law is a model with a defined domain of validity. This interactive tool is educational, not a substitute for instrument qualification or analytical method validation.</p>
+      <div class="sections" style="margin-top:8px">
+        <div>
+          <h3>Model assumptions</h3>
+          <ul>
+            <li>Monochromatic or sufficiently narrow-band radiation.</li>
+            <li>Homogeneous, clear solution with negligible scattering.</li>
+            <li>Absorbing species behave independently.</li>
+            <li>Concentration is within a range where the response is linear.</li>
+            <li>Path length and absorptivity remain constant.</li>
+          </ul>
+        </div>
+        <div>
+          <h3>Real-world deviations</h3>
+          <ul>
+            <li>High concentrations and molecular interactions.</li>
+            <li>Changes in pH, ionisation or chemical speciation.</li>
+            <li>Stray light, finite spectral bandwidth and detector limitations.</li>
+            <li>Turbidity, particulates and scattering.</li>
+            <li>Absorption by solvents, excipients or degradation products.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note">Educational note: “1 − T” is the fraction of incident light not transmitted. It should not automatically be interpreted as true molecular absorption if reflection or scattering is appreciable.</p>
+    </section>
+  </main>
+
+  <footer class="wrap">Light Lab · An open educational exercise in UV–Visible spectroscopy · No data are uploaded or stored.</footer>
+
+  <script>
+    (() => {
+      "use strict";
+      const $ = (id) => document.getElementById(id);
+      const ids = ["i0", "path", "epsX", "cX", "epsY", "cY"];
+      const photonBox = $("photons");
+      for (let n = 0; n < 18; n++) {
+        const p = document.createElement("span");
+        p.className = "photon";
+        photonBox.appendChild(p);
+      }
+      const photons = [...photonBox.children];
+
+      const fmt = (n, digits = 3) => Number.isFinite(n) ? n.toFixed(digits) : "—";
+      const num = id => Number($(id).value);
+
+      function update() {
+        const I0 = num("i0");
+        const b = num("path");
+        const epsX = num("epsX");
+        const epsY = num("epsY");
+        const cX_uM = num("cX");
+        const cY_uM = num("cY");
+        const cX = cX_uM * 1e-6; // µmol/L to mol/L
+        const cY = cY_uM * 1e-6;
+
+        // Beer–Lambert contributions: A = εbc.
+        const AX = epsX * b * cX;
+        const AY = epsY * b * cY;
+        const A = AX + AY;
+        const T = Math.pow(10, -A);
+        const I = I0 * T;
+        const notTransmitted = (1 - T) * 100;
+
+        $("i0Out").textContent = `${fmt(I0, 0)} units`;
+        $("pathOut").textContent = `${fmt(b, 2)} cm`;
+        $("epsXOut").textContent = epsX.toLocaleString("en-US");
+        $("epsYOut").textContent = epsY.toLocaleString("en-US");
+        $("cXOut").textContent = `${fmt(cX_uM, 1)} µM`;
+        $("cYOut").textContent = `${fmt(cY_uM, 1)} µM`;
+
+        $("i0Label").textContent = fmt(I0, 1);
+        $("iLabel").textContent = fmt(I, 2);
+        $("i0Bar").style.width = "100%";
+        $("iBar").style.width = `${Math.max(0, Math.min(100, T * 100))}%`;
+        $("tResult").textContent = fmt(T, 4);
+        $("percentT").textContent = `${fmt(T * 100, 2)}%`;
+        $("aResult").textContent = fmt(A, 4);
+        $("absorbedResult").textContent = `${fmt(notTransmitted, 2)}%`;
+
+        // Illustrative beam: the number of visible photons scales with transmittance.
+        const visible = Math.round(T * photons.length);
+        photons.forEach((p, i) => {
+          p.style.opacity = i < visible ? "1" : ".12";
+          p.style.transform = i < visible ? "scale(1)" : "scale(.55)";
+        });
+        // Visual liquid tint responds to total absorbance; this is illustrative, not a simulated spectrum.
+        const tint = Math.min(0.68, 0.12 + A * 0.18);
+        $("liquid").style.background = `linear-gradient(90deg, rgba(88,215,232,${tint * .45}), rgba(88,215,232,${tint}), rgba(88,215,232,${tint * .45}))`;
+
+        // Expose values for assistive technology and browser inspection.
+        $("tResult").setAttribute("aria-label", `Transmittance ${fmt(T, 4)}`);
+        $("aResult").setAttribute("aria-label", `Absorbance ${fmt(A, 4)}`);
+      }
+
+      ids.forEach(id => $(id).addEventListener("input", update));
+      $("reset").addEventListener("click", () => {
+        const defaults = {i0:100, path:1, epsX:10000, cX:20, epsY:5000, cY:0};
+        Object.entries(defaults).forEach(([id, value]) => { $(id).value = value; });
+        update();
+      });
+
+      document.querySelectorAll(".quiz button").forEach(button => {
+        button.addEventListener("click", () => {
+          const correct = button.dataset.answer === "correct";
+          document.querySelectorAll(".quiz button").forEach(b => b.classList.remove("correct", "wrong"));
+          button.classList.add(correct ? "correct" : "wrong");
+          $("quizFeedback").textContent = correct
+            ? "Correct. Under the Beer–Lambert assumptions, the component absorbances add: 0.20 + 0.30 = 0.50."
+            : "Not quite. Add the absorbances for independent absorbers at the same wavelength: 0.20 + 0.30 = 0.50.";
+        });
+      });
+
+      update();
+    })();
+  </script>
+</body>
+</html>
