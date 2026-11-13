@@ -6,69 +6,52 @@
 
 When a beam of light passes through a sample, some of the incident radiant intensity may be absorbed. Let:
 
-- \(I_0\) = incident radiant intensity
-- \(I\) = transmitted radiant intensity
+- *I*₀ = incident radiant intensity
+- *I* = transmitted radiant intensity
 
 Transmittance is:
 
-\[
-T = \frac{I}{I_0}
-\]
+> **T = I / I₀**
 
 Percent transmittance is:
 
-\[
-\%T = 100T
-\]
+> **%T = 100 × T**
 
 Transmittance is a ratio and is dimensionless.
 
 ### 2. Why intensity attenuation is exponential
 
-Consider a thin layer of solution with thickness \(dx\). For a homogeneous absorbing medium, assume the loss of intensity in this thin layer is proportional to:
+Consider a thin layer of solution with thickness *dx*. For a homogeneous absorbing medium, assume the loss of intensity in this thin layer is proportional to:
 
-- the intensity \(I\) entering the layer;
-- the concentration \(c\) of absorbing species;
-- the thickness \(dx\).
+- the intensity *I* entering the layer;
+- the concentration *c* of absorbing species;
+- the thickness *dx*.
 
 Thus:
 
-\[
--dI = k I c\,dx
-\]
+> **−dI = k · I · c · dx**
 
-where \(k\) is a proportionality constant for the chosen absorbing species and wavelength.
+where *k* is a proportionality constant for the chosen absorbing species and wavelength.
 
 Separate variables:
 
-\[
--\frac{dI}{I}=kc\,dx
-\]
+> **−dI / I = k · c · dx**
 
-Integrate across the sample, from incident intensity \(I_0\) to transmitted intensity \(I\), and from position \(0\) to path length \(b\):
+Integrate across the sample, from incident intensity *I*₀ to transmitted intensity *I*, and from position 0 to path length *b*:
 
-\[
--\int_{I_0}^{I}\frac{dI}{I}
-=kc\int_0^b dx
-\]
+> **−∫ (dI / I) = k · c · ∫ dx** &nbsp; *(from I₀ to I, and 0 to b)*
 
 Therefore:
 
-\[
-\ln\left(\frac{I_0}{I}\right)=kbc
-\]
+> **ln(I₀ / I) = k · b · c**
 
 Rearranging gives the exponential attenuation expression:
 
-\[
-I=I_0e^{-kbc}
-\]
+> **I = I₀ · e^(−kbc)**
 
-Dividing by \(I_0\):
+Dividing by *I*₀:
 
-\[
-T=e^{-kbc}
-\]
+> **T = e^(−kbc)**
 
 This exponential relationship explains why transmittance is not generally linear in concentration.
 
@@ -76,40 +59,30 @@ This exponential relationship explains why transmittance is not generally linear
 
 Take the common (base-10) logarithm of the intensity ratio:
 
-\[
-A=\log_{10}\left(\frac{I_0}{I}\right)
-\]
+> **A = log₁₀(I₀ / I)**
 
-Since \(T=I/I_0\):
+Since *T* = *I* / *I*₀:
 
-\[
-\boxed{A=-\log_{10}T}
-\]
+> **A = −log₁₀(T)**
 
-Using the conversion \(\ln x=2.303\log_{10}x\):
+Using the conversion ln(*x*) = 2.303 log₁₀(*x*):
 
-\[
-A=\frac{k}{2.303}bc
-\]
+> **A = (k / 2.303) · b · c**
 
-Define the molar absorptivity:
+Define the molar absorptivity (*ε*):
 
-\[
-\varepsilon=\frac{k}{2.303}
-\]
+> **ε = k / 2.303**
 
 The Beer–Lambert law follows:
 
-\[
-\boxed{A=\varepsilon bc}
-\]
+> **A = ε · b · c**
 
 where:
 
-- \(A\) = absorbance (dimensionless; often reported in absorbance units, AU);
-- \(\varepsilon\) = molar absorptivity, typically L mol\(^{-1}\) cm\(^{-1}\);
-- \(b\) = optical path length, cm;
-- \(c\) = concentration, mol L\(^{-1}\).
+- *A* = absorbance (dimensionless; often reported in absorbance units, AU);
+- *ε* = molar absorptivity, typically L mol⁻¹ cm⁻¹;
+- *b* = optical path length, cm;
+- *c* = concentration, mol L⁻¹.
 
 For fixed wavelength, chemical species, solvent conditions, and path length, absorbance is proportional to concentration over the range where Beer–Lambert behaviour is valid.
 
@@ -117,32 +90,20 @@ For fixed wavelength, chemical species, solvent conditions, and path length, abs
 
 For two independent absorbing species, X and Y, at the same wavelength:
 
-\[
-A_X=\varepsilon_Xbc_X
-\]
-
-\[
-A_Y=\varepsilon_Ybc_Y
-\]
+> **A_X = ε_X · b · c_X**  
+> **A_Y = ε_Y · b · c_Y**
 
 The attenuation factors multiply:
 
-\[
-T_{\text{mixture}}=T_XT_Y
-\]
+> **T_mixture = T_X × T_Y**
 
 Taking negative base-10 logarithms converts that product into a sum:
 
-\[
-A_{\text{mixture}}=A_X+A_Y
-\]
+> **A_mixture = A_X + A_Y**
 
 Thus:
 
-\[
-A_{\text{mixture}}
-=b(\varepsilon_Xc_X+\varepsilon_Yc_Y)
-\]
+> **A_mixture = b · (ε_X · c_X + ε_Y · c_Y)**
 
 This is the basis of the classical simultaneous-equation method for a binary mixture, measured at two suitably selected wavelengths.
 
@@ -150,33 +111,23 @@ This is the basis of the classical simultaneous-equation method for a binary mix
 
 The simulator calculates:
 
-\[
-A_{\text{total}}=b(\varepsilon_Xc_X+\varepsilon_Yc_Y)
-\]
+> **A_total = b · (ε_X · c_X + ε_Y · c_Y)**  
+> **T = 10^(−A_total)**  
+> **I = I₀ · T**
 
-\[
-T=10^{-A_{\text{total}}}
-\]
+The concentration sliders are in **µM**. The app converts them to mol L⁻¹ before applying the Beer–Lambert equation:
 
-\[
-I=I_0T
-\]
-
-The concentration sliders are in **µM**. The app converts them to mol L\(^{-1}\) before applying the Beer–Lambert equation:
-
-\[
-c(\mathrm{mol\,L^{-1}})=c(\mathrm{\mu M})\times10^{-6}
-\]
+> **c (mol L⁻¹) = c (µM) × 10⁻⁶**
 
 The simulator's default values are:
 
 | Parameter | Component X | Component Y |
 |---|---:|---:|
-| Molar absorptivity | 10,000 L mol\(^{-1}\) cm\(^{-1}\) | 5,000 L mol\(^{-1}\) cm\(^{-1}\) |
+| Molar absorptivity | 10,000 L mol⁻¹ cm⁻¹ | 5,000 L mol⁻¹ cm⁻¹ |
 | Concentration | 20 µM | 0 µM |
 | Path length | 1 cm | 1 cm |
 
-For these defaults, \(A=0.200\), \(T\approx0.6310\), and approximately 63.10% of incident intensity is transmitted.
+For these defaults, *A* = 0.200, *T* ≈ 0.6310, and approximately 63.10% of incident intensity is transmitted.
 
 ## Assumptions and limitations
 
@@ -189,7 +140,7 @@ The simulation is an idealised model. It assumes:
 - Constant path length and absorptivity.
 - No significant uncorrected instrumental effects such as stray light.
 
-In real measurements, reflection, scattering, solvent absorption, matrix effects, chemical association, pH-dependent speciation, and instrument limitations can cause deviations. The quantity \(1-T\) is the fraction of incident intensity not transmitted; it should not automatically be equated with true molecular absorption if reflection or scattering is significant.
+In real measurements, reflection, scattering, solvent absorption, matrix effects, chemical association, pH-dependent speciation, and instrument limitations can cause deviations. The quantity 1 − *T* is the fraction of incident intensity not transmitted; it should not automatically be equated with true molecular absorption if reflection or scattering is significant.
 
 This simulator is an academic teaching aid, not validated analytical software and not a substitute for instrument qualification, calibration, or analytical method validation.
 
