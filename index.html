@@ -1139,7 +1139,7 @@
           <h2>Spectrometer Chamber</h2>
           <span class="tag" style="margin:0; font-size:0.75rem;">Monochromatic Beam</span>
         </div>
-        <p class="sub">Visualise the collimated incident beam (<i>I</i><sub>0</sub>), dynamic cuvette path (<i>b</i>), and transmitted light flux (<i>I</i>) reaching the photodetector.</p>
+        <p class="sub">Visualise the collimated incident beam (\(I_0\)), dynamic cuvette path (\(b\)), and transmitted light flux (\(I\)) reaching the photodetector.</p>
 
         <!-- View Mode Switcher: Visual Lab vs Code Mode -->
         <div class="view-mode-tabs" role="tablist">
@@ -1157,9 +1157,9 @@
           <!-- Optical Stage -->
           <div class="beam-stage" aria-label="Animated illustration of monochromatic light traveling through a solution cuvette to a detector">
             <div class="beam-labels">
-              <span>Source · Incident Beam <i>I</i><sub>0</sub></span>
-              <span>Sample Cuvette (<i>b</i>)</span>
-              <span>Photodetector · <i>I</i></span>
+              <span>Source · Incident Beam \(I_0\)</span>
+              <span>Sample Cuvette (\(b\))</span>
+              <span>Photodetector · \(I\)</span>
             </div>
 
             <div class="beam-track" id="beamTrack">
@@ -1194,14 +1194,14 @@
           <div class="intensity-bars">
             <div class="bar-card">
               <div class="bar-head">
-                <span>Incident Intensity (<i>I</i><sub>0</sub>)</span>
+                <span>Incident Intensity (\(I_0\))</span>
                 <span class="bar-value" id="i0Label">100.0</span>
               </div>
               <div class="meter"><span id="i0Bar" style="width:100%"></span></div>
             </div>
             <div class="bar-card">
               <div class="bar-head">
-                <span>Transmitted Intensity (<i>I</i>)</span>
+                <span>Transmitted Intensity (\(I\))</span>
                 <span class="bar-value" id="iLabel">63.10</span>
               </div>
               <div class="meter trans"><span id="iBar" style="width:63.1%"></span></div>
@@ -1223,7 +1223,7 @@
             <div class="metric">
               <small>Attenuated Fraction</small>
               <strong id="absorbedResult">36.90%</strong>
-              <span class="unit">1 − <i>T</i></span>
+              <span class="unit">\(1 - T\)</span>
             </div>
           </div>
 
@@ -1298,23 +1298,23 @@ I = I0 * T
               Step-by-Step Numerical Substitution
             </div>
             <div class="calc-step">
-              <span class="calc-step-label">Component X: <i>A</i><sub>X</sub> = <i>ε</i><sub>X</sub> · <i>b</i> · <i>c</i><sub>X</sub></span>
+              <span class="calc-step-label">Component X: \(A_X = \varepsilon_X \cdot b \cdot c_X\)</span>
               <span class="calc-step-val" id="calcStepX">10,000 × 1.00 × 2.00×10⁻⁵ = 0.2000</span>
             </div>
             <div class="calc-step">
-              <span class="calc-step-label">Component Y: <i>A</i><sub>Y</sub> = <i>ε</i><sub>Y</sub> · <i>b</i> · <i>c</i><sub>Y</sub></span>
+              <span class="calc-step-label">Component Y: \(A_Y = \varepsilon_Y \cdot b \cdot c_Y\)</span>
               <span class="calc-step-val" id="calcStepY">5,000 × 1.00 × 0.00 = 0.0000</span>
             </div>
             <div class="calc-step">
-              <span class="calc-step-label">Total Absorbance: <i>A</i><sub>total</sub> = <i>A</i><sub>X</sub> + <i>A</i><sub>Y</sub></span>
+              <span class="calc-step-label">Total Absorbance: \(A_{\text{total}} = A_X + A_Y\)</span>
               <span class="calc-step-val" id="calcStepTotal">0.2000 + 0.0000 = 0.2000 AU</span>
             </div>
             <div class="calc-step">
-              <span class="calc-step-label">Transmittance: <i>T</i> = 10<sup>−<i>A</i><sub>total</sub></sup></span>
+              <span class="calc-step-label">Transmittance: \(T = 10^{-A_{\text{total}}}\)</span>
               <span class="calc-step-val" id="calcStepT">10^(-0.2000) = 0.6310 (63.10%)</span>
             </div>
             <div class="calc-step">
-              <span class="calc-step-label">Transmitted Radiant Power: <i>I</i> = <i>I</i><sub>0</sub> · <i>T</i></span>
+              <span class="calc-step-label">Transmitted Radiant Power: \(I = I_0 \cdot T\)</span>
               <span class="calc-step-val" id="calcStepI">100.0 × 0.6310 = 63.10 units</span>
             </div>
           </div>
@@ -1344,7 +1344,7 @@ I = I0 * T
           <!-- Incident Intensity (I0) -->
           <div class="control">
             <div class="control-head">
-              <label for="i0">Incident Intensity (<i>I</i><sub>0</sub>)</label>
+              <label for="i0">Incident Intensity (\(I_0\))</label>
               <output id="i0Out">100 units</output>
             </div>
             <div class="slider-input-group">
@@ -1357,7 +1357,7 @@ I = I0 * T
           <!-- Optical Path Length (b) -->
           <div class="control">
             <div class="control-head">
-              <label for="path">Path Length (<i>b</i>)</label>
+              <label for="path">Path Length (\(b\))</label>
               <output id="pathOut">1.00 cm</output>
             </div>
             <div class="slider-input-group">
@@ -1375,7 +1375,7 @@ I = I0 * T
             </div>
             <div class="control">
               <div class="control-head">
-                <label for="epsX">Molar Absorptivity (<i>ε</i><sub>X</sub>)</label>
+                <label for="epsX">Molar Absorptivity (\(\varepsilon_X\))</label>
                 <output id="epsXOut">10,000</output>
               </div>
               <div class="slider-input-group">
@@ -1386,7 +1386,7 @@ I = I0 * T
             </div>
             <div class="control">
               <div class="control-head">
-                <label for="cX">Concentration (<i>c</i><sub>X</sub>)</label>
+                <label for="cX">Concentration (\(c_X\))</label>
                 <output id="cXOut">20.0 µM</output>
               </div>
               <div class="slider-input-group">
@@ -1405,7 +1405,7 @@ I = I0 * T
             </div>
             <div class="control">
               <div class="control-head">
-                <label for="epsY">Molar Absorptivity (<i>ε</i><sub>Y</sub>)</label>
+                <label for="epsY">Molar Absorptivity (\(\varepsilon_Y\))</label>
                 <output id="epsYOut">5,000</output>
               </div>
               <div class="slider-input-group">
@@ -1416,7 +1416,7 @@ I = I0 * T
             </div>
             <div class="control">
               <div class="control-head">
-                <label for="cY">Concentration (<i>c</i><sub>Y</sub>)</label>
+                <label for="cY">Concentration (\(c_Y\))</label>
                 <output id="cYOut">0.0 µM</output>
               </div>
               <div class="slider-input-group">
@@ -1444,7 +1444,7 @@ I = I0 * T
         
         <h3>1. Transmittance</h3>
         <div class="eq">T = I / I₀</div>
-        <p>Transmittance is the fraction of incident radiant intensity that passes through the sample without being absorbed. Percent transmittance is %<i>T</i> = 100 × <i>T</i>.</p>
+        <p>Transmittance is the fraction of incident radiant intensity that passes through the sample without being absorbed. Percent transmittance is \(\%T = 100 \times T\).</p>
         
         <h3>2. Absorbance</h3>
         <div class="eq">A = −log₁₀(T) = log₁₀(I₀ / I)</div>
@@ -1452,9 +1452,9 @@ I = I0 * T
         
         <h3>3. Beer–Lambert Law</h3>
         <div class="eq"><strong>A = ε · b · c</strong></div>
-        <p>For monochromatic radiation through an ideal homogeneous solution, absorbance is directly proportional to molar absorptivity (<i>ε</i>), optical path length (<i>b</i>), and solute concentration (<i>c</i>).</p>
+        <p>For monochromatic radiation through an ideal homogeneous solution, absorbance is directly proportional to molar absorptivity (\(\varepsilon\)), optical path length (\(b\)), and solute concentration (\(c\)).</p>
         <div class="callout">
-          <strong>Unit Consistency:</strong> Molar absorptivity <i>ε</i> is expressed in L·mol⁻¹·cm⁻¹, path length <i>b</i> in cm, and concentration <i>c</i> is converted from µM to mol·L⁻¹ (1 µM = 10⁻⁶ M).
+          <strong>Unit Consistency:</strong> Molar absorptivity \(\varepsilon\) is expressed in \(\text{L}\cdot\text{mol}^{-1}\cdot\text{cm}^{-1}\), path length \(b\) in \(\text{cm}\), and concentration \(c\) is converted from \(\mu\text{M}\) to \(\text{mol}\cdot\text{L}^{-1}\) (\(1\,\mu\text{M} = 10^{-6}\,\text{M}\)).
         </div>
       </article>
 
@@ -1466,7 +1466,7 @@ I = I0 * T
           <span class="num">1</span>
           <div>
             <strong>A differential thin layer attenuates light.</strong>
-            <p>Across an infinitesimal slice d<i>x</i>, intensity loss is proportional to incident intensity, concentration, and thickness: −d<i>I</i> = <i>k·I·c</i> d<i>x</i>.</p>
+            <p>Across an infinitesimal slice \(dx\), intensity loss is proportional to incident intensity, concentration, and thickness: \(-\mathrm{d}I = k I c \,\mathrm{d}x\).</p>
           </div>
         </div>
         
@@ -1474,7 +1474,7 @@ I = I0 * T
           <span class="num">2</span>
           <div>
             <strong>Separate variables and integrate.</strong>
-            <p>−∫(d<i>I</i> / <i>I</i>) = <i>kc</i> ∫d<i>x</i> &implies; ln(<i>I</i><sub>0</sub> / <i>I</i>) = <i>kbc</i>.</p>
+            <p>\(-\int_{I_0}^I \frac{\mathrm{d}I}{I} = k c \int_0^b \mathrm{d}x \implies \ln\left(\frac{I_0}{I}\right) = kbc\).</p>
           </div>
         </div>
         
@@ -1482,15 +1482,15 @@ I = I0 * T
           <span class="num">3</span>
           <div>
             <strong>Convert to common base-10 logarithm.</strong>
-            <p>Using ln(<i>u</i>) = 2.3026 log₁₀(<i>u</i>), we obtain log₁₀(<i>I</i><sub>0</sub> / <i>I</i>) = (<i>k</i> / 2.3026)<i>bc</i>.</p>
+            <p>Using \(\ln(u) = 2.3026 \log_{10}(u)\), we obtain \(\log_{10}\left(\frac{I_0}{I}\right) = \left(\frac{k}{2.3026}\right)bc\).</p>
           </div>
         </div>
         
         <div class="step">
           <span class="num">4</span>
           <div>
-            <strong>Define molar absorptivity <i>ε</i> and Absorbance <i>A</i>.</strong>
-            <p>Setting <i>ε</i> = <i>k</i> / 2.3026 yields <i>A</i> = −log₁₀(<i>T</i>) = <i>εbc</i>.</p>
+            <strong>Define molar absorptivity \(\varepsilon\) and Absorbance \(A\).</strong>
+            <p>Setting \(\varepsilon = k / 2.3026\) yields \(A = -\log_{10}(T) = \varepsilon b c\).</p>
           </div>
         </div>
         
@@ -1510,7 +1510,7 @@ I = I0 * T
         <p>In contrast, <strong>transmittances never add</strong>; their attenuation factors multiply:</p>
         <div class="eq">T<sub>mixture</sub> = T<sub>X</sub> × T<sub>Y</sub></div>
         <div class="callout">
-          <strong>Binary Analysis in Practice:</strong> By recording total absorbances at two distinct wavelengths (<i>λ</i>₁ and <i>λ</i>₂), two simultaneous linear equations can be solved to determine individual concentrations <i>c</i><sub>X</sub> and <i>c</i><sub>Y</sub>.
+          <strong>Binary Analysis in Practice:</strong> By recording total absorbances at two distinct wavelengths (\(\lambda_1\) and \(\lambda_2\)), two simultaneous linear equations can be solved to determine individual concentrations \(c_X\) and \(c_Y\).
         </div>
       </article>
 
@@ -1552,15 +1552,15 @@ I = I0 * T
         <div>
           <h3>Real-World Deviations</h3>
           <ul style="color:var(--text-secondary); line-height:1.6; padding-left:20px;">
-            <li><strong>High concentrations:</strong> At <i>c</i> &gt; 10 mM, intermolecular distances diminish, perturbing charge distribution and altering <i>ε</i>.</li>
+            <li><strong>High concentrations:</strong> At \(c > 10\,\text{mM}\), intermolecular distances diminish, perturbing charge distribution and altering \(\varepsilon\).</li>
             <li><strong>Chemical equilibria:</strong> Solute association, dissociation, tautomerization, or pH-dependent protonation changes the absorbing species.</li>
-            <li><strong>Instrumental stray light:</strong> Radiation of spurious wavelengths hitting the detector causes negative deviations at high absorbances (<i>A</i> &gt; 2.0).</li>
-            <li><strong>Solvent absorption & refractive index:</strong> Large shifts in solute concentration alter solution refractive index, perturbing <i>ε</i>.</li>
+            <li><strong>Instrumental stray light:</strong> Radiation of spurious wavelengths hitting the detector causes negative deviations at high absorbances (\(A > 2.0\)).</li>
+            <li><strong>Solvent absorption & refractive index:</strong> Large shifts in solute concentration alter solution refractive index, perturbing \(\varepsilon\).</li>
           </ul>
         </div>
       </div>
       <p class="note">
-        Educational Note: In high-performance UV-Vis spectroscopy, standard working absorbance is typically maintained between 0.1 and 1.5 AU to minimise photometric detector noise and stray light errors.
+        Educational Note: In high-performance UV-Vis spectroscopy, standard working absorbance is typically maintained between \(0.1\) and \(1.5\,\text{AU}\) to minimise photometric detector noise and stray light errors.
       </p>
     </section>
   </main>
