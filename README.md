@@ -1,5 +1,7 @@
 # Light Lab — Interactive Beer–Lambert Simulator
 
+[Click here to access the Simulator](https://elvismartis.github.io/beer-lambert-light-lab)
+
 ## The science
 
 ### 1. Transmittance
